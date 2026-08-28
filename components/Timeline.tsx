@@ -32,7 +32,7 @@ export default function Timeline({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto mt-6 p-6 md:p-8 rounded-3xl bg-white border border-neutral-200 shadow-md animate-fade-in space-y-6">
+    <div className="w-full max-w-4xl mx-auto mt-6 p-6 md:p-8 rounded-3xl bg-white border border-neutral-200 shadow-md animate-fade-in space-y-6 print:shadow-none print:border-none print:p-0 print:m-0 print:mt-6">
       <div>
         <h2 className="text-xl font-bold text-neutral-900">
           الجدول الزمني للتحليل السنوي للموقع
@@ -62,7 +62,7 @@ export default function Timeline({
               return (
                 <tr
                   key={item.year}
-                  className={`hover:bg-neutral-50 transition-all duration-200 ${
+                  className={`hover:bg-neutral-50 transition-all duration-200 print-avoid-break ${
                     isConstYear
                       ? "bg-amber-500/5 font-semibold text-amber-900"
                       : "text-neutral-700"
