@@ -47,7 +47,7 @@ export default function Home() {
             محلل تاريخ المباني
           </h1>
           <p className="text-sm md:text-base text-neutral-600 max-w-xl mx-auto leading-relaxed print:text-xs print:mx-0">
-            تقرير تحليلي لتقدير تاريخ البناء ورصد التغييرات عبر صور الأقمار الصناعية (Sentinel-1 SAR)
+            تقرير تحليلي لتقدير تاريخ البناء ورصد التغييرات عبر صور الأقمار الصناعية
           </p>
         </header>
 

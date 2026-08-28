@@ -14,10 +14,10 @@ interface CoordinateFormProps {
 export default function CoordinateForm({ onAnalyze, isLoading }: CoordinateFormProps) {
   // Pre-populate with example coordinates having at least 5 decimal places
   const [points, setPoints] = useState<Point[]>([
-    { lat: '30.41820', lng: '31.56325' },
-    { lat: '30.41820', lng: '31.56365' },
-    { lat: '30.41860', lng: '31.56365' },
-    { lat: '30.41860', lng: '31.56325' },
+    { lat: '30.45365', lng: '31.55186' },
+    { lat: '30.45374', lng: '31.55193' },
+    { lat: '30.45377', lng: '31.551802' },
+    { lat: '30.45369', lng: '31.55175' },
   ]);
 
   const [validationError, setValidationError] = useState<string>('');

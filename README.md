@@ -1,8 +1,8 @@
 # Building History Analyzer (Serverless Node.js + TypeScript MVP)
 
-A fast, modern, and beautiful Web MVP to estimate a building's construction timeline and latest urban change using **Google Earth Engine (GEE)** and **Sentinel-2 Harmonized Satellite Imagery (2016-2026)**.
+A fast, modern, and beautiful Web MVP to estimate a building's construction timeline and latest urban change using **Google Earth Engine (GEE)** and **Satellite Imagery (2008-2026)**.
 
-The analysis is based on the **Normalized Difference Built-Up Index (NDBI)**, which tracks changes in urban and building concrete densities within a user-defined 4-point geographic polygon.
+The analysis tracks changes in urban and building concrete densities within a user-defined 4-point geographic polygon.
 
 ---
 
@@ -11,7 +11,7 @@ The analysis is based on the **Normalized Difference Built-Up Index (NDBI)**, wh
 *   **Frontend**: Next.js (TypeScript, React, Tailwind CSS, App Router)
 *   **Backend (Serverless API Route)**: A Next.js API Route Handler (`/api/analyze-building`)
     *   Authenticates with Google Earth Engine using Service Account credentials.
-    *   Runs the remote Sentinel-2 query and computes NDBI mean over a polygon.
+    *   Runs the remote Google Earth Engine satellite query and computes backscatter mean over a polygon.
     *   **Performance Optimized**: Executes entirely server-side in GEE in a single evaluation roundtrip.
     *   Applies a double-threshold analysis algorithm to estimate the appearance year and last detected change year.
     *   **Zero Python**: Completely written in Node.js / TypeScript.

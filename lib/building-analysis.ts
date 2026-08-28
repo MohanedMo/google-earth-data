@@ -1,6 +1,6 @@
 import { TimelineItem } from '@/types/building';
 
-// Sentinel-1 VV Backscatter thresholds (in dB)
+// Satellite Backscatter thresholds (in dB)
 export const NDBI_THRESHOLD = -10.2;
 export const STABILITY_MARGIN = 1.0;
 export const CHANGE_THRESHOLD = 1.2;
