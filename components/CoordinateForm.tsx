@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { countDecimalPlaces } from '@/lib/validation';
 
 interface Point {
   lat: string;
@@ -11,12 +12,12 @@ interface CoordinateFormProps {
 }
 
 export default function CoordinateForm({ onAnalyze, isLoading }: CoordinateFormProps) {
-  // Pre-populate with the Bilbeis example coordinates
+  // Pre-populate with example coordinates having at least 5 decimal places
   const [points, setPoints] = useState<Point[]>([
-    { lat: '30.4182', lng: '31.56325' },
-    { lat: '30.4182', lng: '31.56365' },
-    { lat: '30.4186', lng: '31.56365' },
-    { lat: '30.4186', lng: '31.56325' },
+    { lat: '30.41820', lng: '31.56325' },
+    { lat: '30.41820', lng: '31.56365' },
+    { lat: '30.41860', lng: '31.56365' },
+    { lat: '30.41860', lng: '31.56325' },
   ]);
 
   const [validationError, setValidationError] = useState<string>('');
@@ -55,6 +56,16 @@ export default function CoordinateForm({ onAnalyze, isLoading }: CoordinateFormP
 
       if (isNaN(parsedLng) || parsedLng < -180 || parsedLng > 180) {
         setValidationError(`النقطة ${i + 1} تحتوي على خط طول غير صالح. يجب أن يكون بين -180 و180.`);
+        return;
+      }
+
+      if (countDecimalPlaces(lat) < 5) {
+        setValidationError(`خط العرض في النقطة ${i + 1} يجب أن يحتوي على 5 أرقام عشرية على الأقل بعد الفاصلة (مثل: 30.708155).`);
+        return;
+      }
+
+      if (countDecimalPlaces(lng) < 5) {
+        setValidationError(`خط الطول في النقطة ${i + 1} يجب أن يحتوي على 5 أرقام عشرية على الأقل بعد الفاصلة (مثل: 31.563255).`);
         return;
       }
 
@@ -101,7 +112,7 @@ export default function CoordinateForm({ onAnalyze, isLoading }: CoordinateFormP
                   value={point.lat}
                   onChange={(e) => handleChange(index, 'lat', e.target.value)}
                   disabled={isLoading}
-                  placeholder="30.0431"
+                  placeholder="30.708155"
                   required
                   className="w-full px-3 py-2 text-sm rounded-lg bg-neutral-50 border border-neutral-200 text-neutral-900 placeholder-neutral-450 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-inner"
                 />
@@ -122,7 +133,7 @@ export default function CoordinateForm({ onAnalyze, isLoading }: CoordinateFormP
                   value={point.lng}
                   onChange={(e) => handleChange(index, 'lng', e.target.value)}
                   disabled={isLoading}
-                  placeholder="31.2331"
+                  placeholder="31.563255"
                   required
                   className="w-full px-3 py-2 text-sm rounded-lg bg-neutral-50 border border-neutral-200 text-neutral-900 placeholder-neutral-450 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-inner"
                 />
