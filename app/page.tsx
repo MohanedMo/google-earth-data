@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import CoordinateForm from "../components/CoordinateForm";
 import AnalysisResult from "../components/AnalysisResult";
+import GoogleEarthViewer from "../components/GoogleEarthViewer";
 import Timeline from "../components/Timeline";
 import { analyzeBuilding, AnalysisResponse } from "../lib/api";
 
@@ -10,7 +11,9 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalysisResponse | null>(null);
-  const [analyzedCoordinates, setAnalyzedCoordinates] = useState<[number, number][] | null>(null);
+  const [analyzedCoordinates, setAnalyzedCoordinates] = useState<
+    [number, number][] | null
+  >(null);
 
   const handleAnalyze = async (coordinates: [number, number][]) => {
     setIsLoading(true);
@@ -41,13 +44,13 @@ export default function Home() {
         {/* Header */}
         <header className="text-center space-y-3 mt-8 print:mt-2 print:text-right print:border-b print:border-neutral-200 print:pb-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-neutral-200 text-[11px] font-semibold tracking-wider text-amber-600 uppercase shadow-sm no-print">
-            🛰️ الاستشعار عن بعد عبر الأقمار الصناعية
+            🛰️ الاستشعار عن بعد & Google Earth
           </div>
           <h1 className="text-3xl md:text-5xl font-black tracking-tight text-neutral-900 print:text-2xl">
             محلل تاريخ المباني
           </h1>
           <p className="text-sm md:text-base text-neutral-600 max-w-xl mx-auto leading-relaxed print:text-xs print:mx-0">
-            تقرير تحليلي لتقدير تاريخ البناء ورصد التغييرات عبر صور الأقمار الصناعية
+            تقرير تحليلي لتقدير تاريخ البناء مع معاينة Google Earth المباشرة
           </p>
         </header>
 
@@ -62,16 +65,15 @@ export default function Home() {
             <div className="relative flex h-10 w-10">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-20"></span>
               <span className="relative inline-flex rounded-full h-10 w-10 bg-amber-100 border border-amber-300 items-center justify-center text-amber-600 text-lg">
-                🛰️
+                🌍
               </span>
             </div>
             <div className="space-y-1">
               <h3 className="text-base font-semibold text-neutral-800">
-                جاري تحليل تاريخ المبنى...
+                جاري تحليل تاريخ المبنى وإعداد الخرائط...
               </h3>
               <p className="text-xs text-neutral-500">
-                قد يستغرق ذلك بضع ثوانٍ حيث نقوم بمعالجة صور الأقمار الصناعية
-                للموقع.
+                نقوم بحساب بيانات الموقع وتجهيز المعاينة المباشرة للـ 4 نقاط.
               </p>
             </div>
           </div>
@@ -91,6 +93,7 @@ export default function Home() {
         {/* Results Section */}
         {result && (
           <>
+            {/* 1. Summary Analysis Result Card */}
             <section id="results">
               <AnalysisResult
                 success={result.success}
@@ -101,7 +104,21 @@ export default function Home() {
               />
             </section>
 
-            {/* Timeline Details Section (Hidden in PDF print) */}
+            {/* 2. Live Google Earth Preview for the 4 Points */}
+            {analyzedCoordinates && (
+              <section id="earth-live-view" className="no-print">
+                <GoogleEarthViewer
+                  coordinates={analyzedCoordinates}
+                  timeline={result.timeline}
+                  estimatedConstructionYear={
+                    result.estimated_construction_year
+                  }
+                  estimatedLastChangeYear={result.estimated_last_change_year}
+                />
+              </section>
+            )}
+
+            {/* 3. Timeline Table Details Section (Hidden in PDF print) */}
             <section id="timeline" className="no-print">
               <Timeline
                 timeline={result.timeline}
@@ -114,7 +131,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="w-full text-center text-[11px] text-neutral-400 border-t border-neutral-200 pt-6 mt-auto print:mt-6 print:pt-4 print:text-[10px]">
-        &copy; {new Date().getFullYear()} محلل تاريخ المباني &bull; تم إنشاء التقرير عبر صور الأقمار الصناعية
+        &copy; {new Date().getFullYear()} محلل تاريخ المباني &bull; تم إنشاء التقرير عبر الأقمار الصناعية وGoogle Earth
       </footer>
     </main>
   );
