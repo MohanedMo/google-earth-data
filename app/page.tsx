@@ -42,15 +42,15 @@ export default function Home() {
 
       <div className="w-full max-w-4xl mx-auto z-10 flex flex-col gap-8 pb-16 print:pb-0 print:gap-4">
         {/* Header */}
-        <header className="text-center space-y-3 mt-8 print:mt-2 print:text-right print:border-b print:border-neutral-200 print:pb-4">
+        <header className="text-center space-y-3 mt-8 print:mt-1 print:text-right print:border-b-2 print:border-black print:pb-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-neutral-200 text-[11px] font-semibold tracking-wider text-amber-600 uppercase shadow-sm no-print">
             🛰️ الاستشعار عن بعد & Google Earth
           </div>
-          <h1 className="text-3xl md:text-5xl font-black tracking-tight text-neutral-900 print:text-2xl">
+          <h1 className="text-3xl md:text-5xl font-black tracking-tight text-neutral-900 print:text-3xl print:font-black print:text-black">
             محلل تاريخ المباني
           </h1>
-          <p className="text-sm md:text-base text-neutral-600 max-w-xl mx-auto leading-relaxed print:text-xs print:mx-0">
-            تقرير تحليلي لتقدير تاريخ البناء مع معاينة Google Earth المباشرة
+          <p className="text-sm md:text-base text-neutral-600 max-w-xl mx-auto leading-relaxed print:text-sm print:font-bold print:text-black print:mx-0">
+            تقرير تحليلي رسمي لتقدير تاريخ البناء مع معاينة Google Earth المباشرة للأركان
           </p>
         </header>
 
@@ -106,7 +106,7 @@ export default function Home() {
 
             {/* 2. Live Google Earth Preview for the 4 Points */}
             {analyzedCoordinates && (
-              <section id="earth-live-view" className="no-print">
+              <section id="earth-live-view" className="print-avoid-break">
                 <GoogleEarthViewer
                   coordinates={analyzedCoordinates}
                   timeline={result.timeline}

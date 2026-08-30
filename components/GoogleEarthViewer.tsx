@@ -37,7 +37,7 @@ export default function GoogleEarthViewer({
   const centerLat = centerCoord[1];
   const centerLng = centerCoord[0];
 
-  const googleEarthUrl = `https://earth.google.com/web/@${centerLat},${centerLng},150a,450d,35y,0t,0r`;
+  const googleEarthUrl = `https://earth.google.com/web/@${centerLat},${centerLng},80a,250d,35y,0t,0r`;
   const googleMapsSatelliteUrl = `https://www.google.com/maps/search/?api=1&query=${centerLat},${centerLng}`;
 
   // Initialize and manage Leaflet map
@@ -58,8 +58,8 @@ export default function GoogleEarthViewer({
 
       const map = L.map(mapContainerRef.current, {
         center: [centerLat, centerLng],
-        zoom: 19,
-        maxZoom: 21,
+        zoom: 20,
+        maxZoom: 22,
         zoomControl: false,
         attributionControl: false,
       });
@@ -71,7 +71,8 @@ export default function GoogleEarthViewer({
           : "https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}";
 
       tileLayerInstance = L.tileLayer(tileUrl, {
-        maxZoom: 21,
+        maxZoom: 22,
+        maxNativeZoom: 20,
         subdomains: ["mt0", "mt1", "mt2", "mt3"],
       }).addTo(map);
 
@@ -154,11 +155,11 @@ export default function GoogleEarthViewer({
           </div>
         `);
 
-      // Invalidate size after rendering to prevent gray/black tiles bug
+      // Invalidate size after rendering and fit bounds with high zoom
       const fitAndRefresh = () => {
         if (!map) return;
         map.invalidateSize();
-        map.fitBounds(polygonLayer.getBounds(), { padding: [60, 60], maxZoom: 19 });
+        map.fitBounds(polygonLayer.getBounds(), { padding: [30, 30], maxZoom: 20 });
       };
 
       fitAndRefresh();
@@ -196,7 +197,7 @@ export default function GoogleEarthViewer({
     setActivePointIndex(idx);
     const coord = coordinates[idx];
     if (coord && leafletMapRef.current) {
-      leafletMapRef.current.flyTo([coord[1], coord[0]], 19);
+      leafletMapRef.current.flyTo([coord[1], coord[0]], 20);
       if (markersRef.current[idx]) {
         markersRef.current[idx].openPopup();
       }
@@ -210,23 +211,23 @@ export default function GoogleEarthViewer({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto mt-6 rounded-3xl bg-[#111216] text-white border border-[#262832] shadow-2xl overflow-hidden relative select-none animate-fade-in">
+    <div className="w-full max-w-4xl mx-auto mt-6 rounded-3xl bg-[#111216] text-white border border-[#262832] shadow-2xl overflow-hidden relative select-none animate-fade-in print:rounded-2xl print:my-4 print:shadow-none print-avoid-break print:border-2 print:border-black print:bg-white print:text-black">
       {/* Header Bar */}
-      <div className="p-4 md:p-5 border-b border-[#262832] bg-[#1a1b22] flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-4 md:p-5 border-b border-[#262832] bg-[#1a1b22] flex flex-col md:flex-row md:items-center justify-between gap-4 print:bg-white print:border-b-2 print:border-black print:p-3">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="text-xl">🌍</span>
-            <h2 className="text-lg font-bold text-white tracking-tight">
+            <span className="text-xl print:text-2xl">🌍</span>
+            <h2 className="text-lg font-bold text-white tracking-tight print:text-lg print:font-black print:text-black">
               معاينة Google Earth المباشرة للـ 4 نقاط
             </h2>
           </div>
-          <p className="text-xs text-neutral-400">
-            صور الأقمار الصناعية البصرية الطبيعية عالية الدقة مع دبابيس وروابط Google Earth و Google Maps
+          <p className="text-xs text-neutral-400 print:text-xs print:font-bold print:text-neutral-900">
+            صور الأقمار الصناعية البصرية الطبيعية عالية الدقة مع دبابيس الموقع
           </p>
         </div>
 
         {/* Action Launchers */}
-        <div className="flex items-center flex-wrap gap-2.5">
+        <div className="flex items-center flex-wrap gap-2.5 no-print">
           <a
             href={googleEarthUrl}
             target="_blank"
@@ -278,10 +279,13 @@ export default function GoogleEarthViewer({
       </div>
 
       {/* Layer Switcher Bar */}
-      <div className="bg-[#14151a] px-4 py-2.5 border-b border-[#262832] flex items-center justify-between text-xs">
+      <div className="bg-[#14151a] px-4 py-2.5 border-b border-[#262832] flex items-center justify-between text-xs print:bg-neutral-100 print:border-b-2 print:border-black print:text-black print:px-3 print:py-2">
         <div className="flex items-center gap-2">
-          <span className="text-neutral-400">نمط الخريطة الفضائية:</span>
-          <div className="inline-flex rounded-lg bg-[#1e1f26] p-0.5 border border-neutral-700">
+          <span className="text-neutral-400 print:text-black print:font-bold">نمط الخريطة:</span>
+          <span className="hidden print:inline text-black font-black">
+            {mapLayer === "hybrid" ? "فضائي مع التسميات (Hybrid)" : "فضائي نقي (Google Earth)"}
+          </span>
+          <div className="inline-flex rounded-lg bg-[#1e1f26] p-0.5 border border-neutral-700 no-print">
             <button
               type="button"
               onClick={() => setMapLayer("satellite")}
@@ -307,18 +311,18 @@ export default function GoogleEarthViewer({
           </div>
         </div>
 
-        <div className="text-[11px] font-mono text-amber-400">
+        <div className="text-[11px] font-mono text-amber-400 print:text-black print:font-black print:text-xs">
           المركز: {centerLat.toFixed(5)}, {centerLng.toFixed(5)}
         </div>
       </div>
 
       {/* Map Viewport */}
-      <div className="relative w-full h-[460px] md:h-[540px] bg-[#0b0c10]">
+      <div className="relative w-full h-[460px] md:h-[540px] print:h-[380px] bg-[#0b0c10] print:border-b-2 print:border-black">
         {/* Leaflet Mount Container */}
         <div ref={mapContainerRef} className="w-full h-full" />
 
         {/* Floating Zoom & Center Buttons (Bottom Left) */}
-        <div className="absolute bottom-6 left-6 z-20 flex flex-col gap-2">
+        <div className="absolute bottom-6 left-6 z-20 flex flex-col gap-2 no-print">
           <div className="flex flex-col rounded-xl bg-[#1e1f26]/95 backdrop-blur-md border border-neutral-700 shadow-2xl overflow-hidden">
             <button
               type="button"
@@ -342,7 +346,7 @@ export default function GoogleEarthViewer({
             type="button"
             onClick={() => {
               if (leafletMapRef.current) {
-                leafletMapRef.current.flyTo([centerLat, centerLng], 19);
+                leafletMapRef.current.flyTo([centerLat, centerLng], 20);
               }
             }}
             title="إعادة التركيز على مركز الـ 4 نقاط"
@@ -354,18 +358,18 @@ export default function GoogleEarthViewer({
       </div>
 
       {/* 4 Points Cards below map */}
-      <div className="p-4 md:p-6 bg-[#16171d] border-t border-[#262832] space-y-4">
+      <div className="p-4 md:p-6 bg-[#16171d] border-t border-[#262832] space-y-4 print:p-4 print:space-y-3 print:bg-white print:text-black">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <span className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+          <span className="text-xs font-bold text-amber-400 flex items-center gap-1.5 print:text-black print:font-black print:text-base">
             <span>📍</span>
             <span>دبابيس وإحداثيات أركان المبنى الـ 4:</span>
           </span>
-          <span className="text-[11px] text-neutral-400">
+          <span className="text-[11px] text-neutral-400 no-print">
             انقر على أي نقطة للتركيز عليها في الخريطة أو فتحها مباشرة
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 print:grid-cols-4 print:gap-3">
           {coordinates.map(([lng, lat], idx) => {
             const isHovered = activePointIndex === idx;
             const isCopied = copiedPoint === idx;
@@ -376,18 +380,18 @@ export default function GoogleEarthViewer({
               <div
                 key={idx}
                 onClick={() => focusPoint(idx)}
-                className={`p-3 rounded-2xl border cursor-pointer transition-all duration-200 flex flex-col justify-between ${
+                className={`p-3 rounded-2xl border cursor-pointer transition-all duration-200 flex flex-col justify-between print:p-3 print:rounded-xl print:border-2 print:border-black print:bg-white print:space-y-2 ${
                   isHovered
                     ? "bg-amber-500/15 border-amber-500 shadow-md shadow-amber-500/10 scale-[1.02]"
                     : "bg-[#1e1f28] border-[#2e3040] hover:border-neutral-600"
                 }`}
               >
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-2 print:mb-0 print:border-b print:border-neutral-300 print:pb-1.5">
                   <div className="flex items-center gap-1.5">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-neutral-950 text-xs font-black">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-neutral-950 text-xs font-black print:bg-black print:text-white print:font-black print:text-xs print:px-2 print:py-0.5 print:rounded print:w-auto print:h-auto">
                       P{idx + 1}
                     </span>
-                    <span className="text-xs font-bold text-neutral-200">
+                    <span className="text-xs font-bold text-neutral-200 print:text-black print:font-black print:text-sm">
                       النقطة {idx + 1}
                     </span>
                   </div>
@@ -398,18 +402,24 @@ export default function GoogleEarthViewer({
                       copyPointCoordinates(idx, lng, lat);
                     }}
                     title="نسخ الإحداثيات"
-                    className="text-[10px] text-neutral-400 hover:text-white px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700"
+                    className="text-[10px] text-neutral-400 hover:text-white px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 no-print"
                   >
                     {isCopied ? "تم النسخ ✓" : "نسخ 📋"}
                   </button>
                 </div>
 
-                <div className="font-mono text-[11px] text-neutral-300 space-y-0.5 mb-3">
-                  <div>عرض: <strong className="text-amber-300">{lat}</strong></div>
-                  <div>طول: <strong className="text-amber-300">{lng}</strong></div>
+                <div className="font-mono text-[11px] text-neutral-300 space-y-0.5 mb-3 print:mb-0 print:text-black print:space-y-1.5">
+                  <div className="flex justify-between items-center">
+                    <span className="print:text-neutral-900 print:font-bold print:text-xs">العرض:</span>
+                    <strong className="text-amber-300 print:text-black print:font-black print:text-sm">{lat}</strong>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="print:text-neutral-900 print:font-bold print:text-xs">الطول:</span>
+                    <strong className="text-amber-300 print:text-black print:font-black print:text-sm">{lng}</strong>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 pt-2 border-t border-neutral-700/60">
+                <div className="flex items-center gap-1.5 pt-2 border-t border-neutral-700/60 no-print">
                   <a
                     href={pointEarthLink}
                     target="_blank"
