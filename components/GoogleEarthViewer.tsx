@@ -282,18 +282,18 @@ export default function GoogleEarthViewer({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto mt-6 rounded-3xl bg-[#111216] text-white border border-[#262832] shadow-2xl overflow-hidden relative select-none animate-fade-in print:rounded-2xl print:my-4 print:shadow-none print-avoid-break print:border-2 print:border-black print:bg-white print:text-black">
+    <div className="w-full max-w-4xl mx-auto mt-6 rounded-3xl bg-[#111216] text-white border border-[#262832] shadow-2xl overflow-hidden relative select-none animate-fade-in print:rounded-2xl print:m-0 print:shadow-none print-avoid-break print:border-2 print:border-black print:bg-white print:text-black">
       {/* Header Bar */}
       <div className="p-4 md:p-5 border-b border-[#262832] bg-[#1a1b22] flex flex-col md:flex-row md:items-center justify-between gap-4 print:bg-white print:border-b-2 print:border-black print:p-3">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="text-xl print:text-2xl">🌍</span>
-            <h2 className="text-lg font-bold text-white tracking-tight print:text-lg print:font-black print:text-black">
-              معاينة Google Earth المباشرة للـ 4 نقاط
+            <h2 className="text-lg font-bold text-white tracking-tight print:text-base print:font-black print:text-black">
+              معاينة Google Earth المباشرة للأركان الـ 4
             </h2>
           </div>
           <p className="text-xs text-neutral-400 print:text-xs print:font-bold print:text-neutral-900">
-            صور الأقمار الصناعية البصرية الطبيعية عالية الدقة مع دبابيس الموقع
+            صور الأقمار الصناعية البصرية الطبيعية عالية الدقة مع دبابيس ومحيط الموقع
           </p>
         </div>
 
@@ -360,10 +360,10 @@ export default function GoogleEarthViewer({
       </div>
 
       {/* Layer Switcher Bar */}
-      <div className="bg-[#14151a] px-4 py-2.5 border-b border-[#262832] flex items-center justify-between text-xs print:bg-neutral-100 print:border-b-2 print:border-black print:text-black print:px-3 print:py-2">
+      <div className="bg-[#14151a] px-4 py-2.5 border-b border-[#262832] flex items-center justify-between text-xs print:bg-neutral-100 print:border-b-2 print:border-black print:text-black print:px-3 print:py-1.5">
         <div className="flex items-center gap-2">
-          <span className="text-neutral-400 print:text-black print:font-bold">نمط الخريطة:</span>
-          <span className="hidden print:inline text-black font-black">
+          <span className="text-neutral-400 print:text-black print:font-bold print:text-xs">نمط الخريطة:</span>
+          <span className="hidden print:inline text-black font-black print:text-xs">
             {mapLayer === "hybrid" ? "فضائي مع التسميات (Hybrid)" : "فضائي نقي (Google Earth)"}
           </span>
           <div className="inline-flex rounded-lg bg-[#1e1f26] p-0.5 border border-neutral-700 no-print">
@@ -398,7 +398,7 @@ export default function GoogleEarthViewer({
       </div>
 
       {/* Map Viewport */}
-      <div className="relative w-full h-[460px] md:h-[540px] print:h-[380px] bg-[#0b0c10] print:border-b-2 print:border-black">
+      <div className="relative w-full h-[460px] md:h-[540px] print:h-[350px] bg-[#0b0c10]">
         {/* Leaflet Mount Container */}
         <div ref={mapContainerRef} className="w-full h-full" />
 
@@ -438,8 +438,8 @@ export default function GoogleEarthViewer({
         </div>
       </div>
 
-      {/* 4 Points Cards below map */}
-      <div className="p-4 md:p-6 bg-[#16171d] border-t border-[#262832] space-y-4 print:p-4 print:space-y-3 print:bg-white print:text-black">
+      {/* 4 Points Cards below map (Hidden in PDF print) */}
+      <div className="p-4 md:p-6 bg-[#16171d] border-t border-[#262832] space-y-4 no-print">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <span className="text-xs font-bold text-amber-400 flex items-center gap-1.5 print:text-black print:font-black print:text-base">
             <span>📍</span>

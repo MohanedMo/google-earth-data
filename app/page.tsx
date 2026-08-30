@@ -24,7 +24,29 @@ export default function Home() {
     try {
       const response = await analyzeBuilding(coordinates);
       if (response.success) {
-        setResult(response);
+        let finalResponse = { ...response };
+        if (
+          finalResponse.estimated_construction_year === null ||
+          finalResponse.estimated_construction_year === undefined
+        ) {
+          const validItems = (finalResponse.timeline || []).filter(
+            (t) => t.ndbi !== null
+          );
+          if (validItems.length > 0) {
+            const maxVal = Math.max(...validItems.map((t) => t.ndbi!));
+            const peakYear = validItems.find((t) => t.ndbi === maxVal)?.year;
+            if (peakYear) {
+              finalResponse.estimated_construction_year = peakYear;
+              if (
+                !finalResponse.message ||
+                finalResponse.message.includes("لم يتم رصد")
+              ) {
+                finalResponse.message = `تم تقدير سنة البناء وفقاً لأعلى شدة ارتداد (100%) في عام ${peakYear}.`;
+              }
+            }
+          }
+        }
+        setResult(finalResponse);
       } else {
         setError(response.error || "فشل في تحليل تاريخ المبنى.");
       }
@@ -93,8 +115,8 @@ export default function Home() {
         {/* Results Section */}
         {result && (
           <>
-            {/* 1. Summary Analysis Result Card */}
-            <section id="results">
+            {/* 1. Summary Analysis Result Card (Page 1) */}
+            <section id="results" className="print-avoid-break">
               <AnalysisResult
                 success={result.success}
                 estimatedConstructionYear={result.estimated_construction_year}
@@ -104,9 +126,9 @@ export default function Home() {
               />
             </section>
 
-            {/* 2. Live Google Earth Preview for the 4 Points */}
+            {/* 2. Live Google Earth Preview for the 4 Points (Page 1) */}
             {analyzedCoordinates && (
-              <section id="earth-live-view" className="print-avoid-break">
+              <section id="earth-live-view" className="print-avoid-break print:mt-4">
                 <GoogleEarthViewer
                   coordinates={analyzedCoordinates}
                   timeline={result.timeline}
@@ -118,8 +140,8 @@ export default function Home() {
               </section>
             )}
 
-            {/* 3. Timeline Table Details Section (Hidden in PDF print) */}
-            <section id="timeline" className="no-print">
+            {/* 3. Timeline Table Details Section (Page 2) */}
+            <section id="timeline" className="print-break-before print-avoid-break print:pt-4">
               <Timeline
                 timeline={result.timeline}
                 estimatedConstructionYear={result.estimated_construction_year}

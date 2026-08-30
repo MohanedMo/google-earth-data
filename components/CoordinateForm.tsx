@@ -11,16 +11,45 @@ interface CoordinateFormProps {
   isLoading: boolean;
 }
 
+const DEFAULT_POINTS: Point[] = [
+  { lat: '30.45365', lng: '31.55186' },
+  { lat: '30.45374', lng: '31.55193' },
+  { lat: '30.45377', lng: '31.551802' },
+  { lat: '30.45369', lng: '31.55175' },
+];
+
+const STORAGE_KEY = 'building_coordinates_points';
+
 export default function CoordinateForm({ onAnalyze, isLoading }: CoordinateFormProps) {
-  // Pre-populate with example coordinates having at least 5 decimal places
-  const [points, setPoints] = useState<Point[]>([
-    { lat: '30.45365', lng: '31.55186' },
-    { lat: '30.45374', lng: '31.55193' },
-    { lat: '30.45377', lng: '31.551802' },
-    { lat: '30.45369', lng: '31.55175' },
-  ]);
+  const [points, setPoints] = useState<Point[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = sessionStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length === 4) {
+            return parsed;
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load points from sessionStorage', e);
+      }
+    }
+    return DEFAULT_POINTS;
+  });
 
   const [validationError, setValidationError] = useState<string>('');
+
+  const savePoints = (newPoints: Point[]) => {
+    setPoints(newPoints);
+    if (typeof window !== 'undefined') {
+      try {
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(newPoints));
+      } catch (e) {
+        console.error('Failed to save points to sessionStorage', e);
+      }
+    }
+  };
 
   const handleChange = (index: number, field: keyof Point, value: string) => {
     const newPoints = [...points];
@@ -28,7 +57,12 @@ export default function CoordinateForm({ onAnalyze, isLoading }: CoordinateFormP
       ...newPoints[index],
       [field]: value
     };
-    setPoints(newPoints);
+    savePoints(newPoints);
+    setValidationError('');
+  };
+
+  const handleReset = () => {
+    savePoints(DEFAULT_POINTS);
     setValidationError('');
   };
 
@@ -149,11 +183,11 @@ export default function CoordinateForm({ onAnalyze, isLoading }: CoordinateFormP
         </div>
       )}
 
-      <div className="flex justify-center pt-2">
+      <div className="flex items-center justify-center gap-3 pt-2">
         <button
           type="submit"
           disabled={isLoading}
-          className="relative inline-flex items-center justify-center px-8 py-3.5 text-base font-semibold text-white bg-gradient-to-r from-amber-600 to-amber-500 rounded-xl shadow-md shadow-amber-500/15 hover:from-amber-500 hover:to-amber-400 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed disabled:from-amber-600 disabled:to-amber-500"
+          className="relative inline-flex items-center justify-center px-8 py-3.5 text-base font-semibold text-white bg-gradient-to-r from-amber-600 to-amber-500 rounded-xl shadow-md shadow-amber-500/15 hover:from-amber-500 hover:to-amber-400 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed disabled:from-amber-600 disabled:to-amber-500 cursor-pointer"
         >
           {isLoading ? (
             <div className="flex items-center gap-2">
@@ -166,6 +200,16 @@ export default function CoordinateForm({ onAnalyze, isLoading }: CoordinateFormP
           ) : (
             'تحليل المبنى'
           )}
+        </button>
+
+        <button
+          type="button"
+          onClick={handleReset}
+          disabled={isLoading}
+          title="استعادة الإحداثيات الافتراضية"
+          className="px-4 py-3.5 text-sm font-medium text-neutral-600 hover:text-neutral-900 bg-white border border-neutral-200 hover:border-neutral-300 rounded-xl shadow-sm transition-all duration-200 cursor-pointer disabled:opacity-50"
+        >
+          🔄 إعادة تعيين
         </button>
       </div>
     </form>

@@ -36,6 +36,18 @@ export function interpretNdbiTimeline(timeline: TimelineItem[]): {
     }
   }
 
+  // Fallback: If no construction year detected by threshold, determine it from the year with 100% backscatter intensity scale (max NDBI)
+  if (estimated_construction_year === null) {
+    const validItems = sortedTimeline.filter(item => item.ndbi !== null);
+    if (validItems.length > 0) {
+      const maxNdbi = Math.max(...validItems.map(item => item.ndbi!));
+      const peakItem = validItems.find(item => item.ndbi === maxNdbi);
+      if (peakItem) {
+        estimated_construction_year = peakItem.year;
+      }
+    }
+  }
+
   // 2. Last Change Detection
   if (estimated_construction_year !== null) {
     let constIdx = -1;
