@@ -37,8 +37,79 @@ export default function GoogleEarthViewer({
   const centerLat = centerCoord[1];
   const centerLng = centerCoord[0];
 
-  const googleEarthUrl = `https://earth.google.com/web/@${centerLat},${centerLng},80a,250d,35y,0t,0r`;
-  const googleMapsSatelliteUrl = `https://www.google.com/maps/search/?api=1&query=${centerLat},${centerLng}`;
+  const googleEarthUrl = `https://earth.google.com/web/search/${centerLat},+${centerLng}`;
+  const googleMapsSatelliteUrl = `https://www.google.com/maps/place/${centerLat},${centerLng}/@${centerLat},${centerLng},20z/data=!3m1!1e3`;
+
+  // Download KML file with polygon & pins for Google Earth
+  const downloadKml = () => {
+    const kmlCoordinates = coordinates
+      .map(([lng, lat]) => `${lng},${lat},0`)
+      .concat([`${coordinates[0][0]},${coordinates[0][1]},0`])
+      .join(" ");
+
+    const placemarks = coordinates
+      .map(
+        ([lng, lat], idx) => `
+    <Placemark>
+      <name>📍 النقطة ${idx + 1} (P${idx + 1})</name>
+      <description>خط العرض: ${lat}&#10;خط الطول: ${lng}</description>
+      <Point>
+        <coordinates>${lng},${lat},0</coordinates>
+      </Point>
+    </Placemark>`
+      )
+      .join("");
+
+    const kmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>موقع المبنى والـ 4 نقاط</name>
+    <description>تحليل تاريخ المبنى عبر الاستشعار عن بعد وGoogle Earth</description>
+    <Style id="polyStyle">
+      <LineStyle>
+        <color>ff00d7ff</color>
+        <width>3.5</width>
+      </LineStyle>
+      <PolyStyle>
+        <color>6600d7ff</color>
+      </PolyStyle>
+    </Style>
+    <Placemark>
+      <name>محيط المبنى (4 أركان)</name>
+      <styleUrl>#polyStyle</styleUrl>
+      <Polygon>
+        <tessellate>1</tessellate>
+        <altitudeMode>clampToGround</altitudeMode>
+        <outerBoundaryIs>
+          <LinearRing>
+            <coordinates>${kmlCoordinates}</coordinates>
+          </LinearRing>
+        </outerBoundaryIs>
+      </Polygon>
+    </Placemark>
+    ${placemarks}
+    <Placemark>
+      <name>🎯 مركز المبنى</name>
+      <description>سنة البناء التقديرية: ${estimatedConstructionYear || "غير محدد"}</description>
+      <Point>
+        <coordinates>${centerLng},${centerLat},0</coordinates>
+      </Point>
+    </Placemark>
+  </Document>
+</kml>`;
+
+    const blob = new Blob([kmlContent], {
+      type: "application/vnd.google-earth.kml+xml;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `building_pins_${centerLat.toFixed(5)}_${centerLng.toFixed(5)}.kml`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   // Initialize and manage Leaflet map
   useEffect(() => {
@@ -108,8 +179,8 @@ export default function GoogleEarthViewer({
           popupAnchor: [0, -38],
         });
 
-        const pointMapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-        const pointEarthUrl = `https://earth.google.com/web/@${lat},${lng},120a,350d,35y,0t,0r`;
+        const pointMapsUrl = `https://www.google.com/maps/place/${lat},${lng}/@${lat},${lng},20z/data=!3m1!1e3`;
+        const pointEarthUrl = `https://earth.google.com/web/search/${lat},+${lng}`;
 
         const marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
         marker.bindPopup(`
@@ -123,7 +194,7 @@ export default function GoogleEarthViewer({
             </div>
             <div style="display: flex; gap: 6px; border-top: 1px solid #e2e8f0; padding-top: 6px;">
               <a href="${pointEarthUrl}" target="_blank" rel="noopener noreferrer" style="flex: 1; text-align: center; font-size: 10px; background: #2563eb; color: white; padding: 4px 6px; border-radius: 6px; text-decoration: none; font-weight: bold;">
-                🌍 Earth
+                📍 دبابيس Earth
               </a>
               <a href="${pointMapsUrl}" target="_blank" rel="noopener noreferrer" style="flex: 1; text-align: center; font-size: 10px; background: #059669; color: white; padding: 4px 6px; border-radius: 6px; text-decoration: none; font-weight: bold;">
                 🗺️ Maps
@@ -228,15 +299,25 @@ export default function GoogleEarthViewer({
 
         {/* Action Launchers */}
         <div className="flex items-center flex-wrap gap-2.5 no-print">
+          <button
+            type="button"
+            onClick={downloadKml}
+            title="تحميل ملف KML لفتح الـ 4 نقاط مع الدبابيس والمضلع مباشرة في Google Earth"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold shadow-md shadow-amber-600/30 transition-all duration-200 cursor-pointer"
+          >
+            <span>📌</span>
+            <span>تحميل دبابيس (KML)</span>
+          </button>
+
           <a
             href={googleEarthUrl}
             target="_blank"
             rel="noopener noreferrer"
-            title="فتح الموقع في Google Earth 3D"
+            title="فتح الموقع مع الدبوس في Google Earth"
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md shadow-blue-600/30 transition-all duration-200"
           >
-            <span>🌍</span>
-            <span>Google Earth 3D</span>
+            <span>📍</span>
+            <span>Google Earth مع الدبوس</span>
             <svg
               className="w-3.5 h-3.5 opacity-80"
               fill="none"
@@ -256,11 +337,11 @@ export default function GoogleEarthViewer({
             href={googleMapsSatelliteUrl}
             target="_blank"
             rel="noopener noreferrer"
-            title="فتح الموقع في Google Maps Satellite"
+            title="فتح الموقع مع الدبوس في Google Maps Satellite"
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-600/30 transition-all duration-200"
           >
             <span>🗺️</span>
-            <span>Google Maps Satellite</span>
+            <span>Google Maps Satellite (مع دبوس)</span>
             <svg
               className="w-3.5 h-3.5 opacity-80"
               fill="none"
@@ -373,8 +454,8 @@ export default function GoogleEarthViewer({
           {coordinates.map(([lng, lat], idx) => {
             const isHovered = activePointIndex === idx;
             const isCopied = copiedPoint === idx;
-            const pointEarthLink = `https://earth.google.com/web/@${lat},${lng},120a,350d,35y,0t,0r`;
-            const pointMapsLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+            const pointEarthLink = `https://earth.google.com/web/search/${lat},+${lng}`;
+            const pointMapsLink = `https://www.google.com/maps/place/${lat},${lng}/@${lat},${lng},20z/data=!3m1!1e3`;
 
             return (
               <div
@@ -427,7 +508,7 @@ export default function GoogleEarthViewer({
                     onClick={(e) => e.stopPropagation()}
                     className="flex-1 text-center py-1 rounded-lg bg-blue-600/30 hover:bg-blue-600 text-blue-300 hover:text-white text-[10px] font-bold transition-colors"
                   >
-                    🌍 Earth
+                    📍 دبابيس Earth
                   </a>
                   <a
                     href={pointMapsLink}
