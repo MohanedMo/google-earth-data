@@ -7,7 +7,7 @@ interface Point {
 }
 
 interface CoordinateFormProps {
-  onAnalyze: (coordinates: [number, number][]) => void;
+  onAnalyze: (coordinates: [number, number][], ownerName?: string) => void;
   isLoading: boolean;
 }
 
@@ -19,8 +19,20 @@ const DEFAULT_POINTS: Point[] = [
 ];
 
 const STORAGE_KEY = 'building_coordinates_points';
+const NAME_STORAGE_KEY = 'building_owner_name';
 
 export default function CoordinateForm({ onAnalyze, isLoading }: CoordinateFormProps) {
+  const [ownerName, setOwnerName] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        return sessionStorage.getItem(NAME_STORAGE_KEY) || '';
+      } catch (e) {
+        console.error('Failed to load owner name from sessionStorage', e);
+      }
+    }
+    return '';
+  });
+
   const [points, setPoints] = useState<Point[]>(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -39,6 +51,17 @@ export default function CoordinateForm({ onAnalyze, isLoading }: CoordinateFormP
   });
 
   const [validationError, setValidationError] = useState<string>('');
+
+  const handleNameChange = (val: string) => {
+    setOwnerName(val);
+    if (typeof window !== 'undefined') {
+      try {
+        sessionStorage.setItem(NAME_STORAGE_KEY, val);
+      } catch (e) {
+        console.error('Failed to save owner name to sessionStorage', e);
+      }
+    }
+  };
 
   const savePoints = (newPoints: Point[]) => {
     setPoints(newPoints);
@@ -63,6 +86,7 @@ export default function CoordinateForm({ onAnalyze, isLoading }: CoordinateFormP
 
   const handleReset = () => {
     savePoints(DEFAULT_POINTS);
+    handleNameChange('');
     setValidationError('');
   };
 
@@ -112,11 +136,31 @@ export default function CoordinateForm({ onAnalyze, isLoading }: CoordinateFormP
       return;
     }
 
-    onAnalyze(formattedCoords);
+    onAnalyze(formattedCoords, ownerName.trim());
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-4xl mx-auto">
+      {/* Name / Property Input Field */}
+      <div className="p-5 rounded-2xl bg-white border border-neutral-200 shadow-sm transition-all duration-300 hover:border-neutral-300">
+        <label
+          htmlFor="owner-name"
+          className="block text-sm font-semibold text-neutral-800 mb-1.5 flex items-center gap-2"
+        >
+          <span>👤</span>
+          <span>اسم العميل / اسم صاحب العقار أو المشروع (اختياري للتقرير)</span>
+        </label>
+        <input
+          id="owner-name"
+          type="text"
+          value={ownerName}
+          onChange={(e) => handleNameChange(e.target.value)}
+          disabled={isLoading}
+          placeholder="مثال: م. أحمد محمد / برج الأندلس السكني"
+          className="w-full px-3.5 py-2.5 text-sm rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 disabled:opacity-50 transition-all duration-200 shadow-inner"
+        />
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {points.map((point, index) => (
           <div

@@ -14,12 +14,17 @@ export default function Home() {
   const [analyzedCoordinates, setAnalyzedCoordinates] = useState<
     [number, number][] | null
   >(null);
+  const [ownerName, setOwnerName] = useState<string>("");
 
-  const handleAnalyze = async (coordinates: [number, number][]) => {
+  const handleAnalyze = async (
+    coordinates: [number, number][],
+    name?: string
+  ) => {
     setIsLoading(true);
     setError(null);
     setResult(null);
     setAnalyzedCoordinates(coordinates);
+    setOwnerName(name || "");
 
     try {
       const response = await analyzeBuilding(coordinates);
@@ -123,6 +128,7 @@ export default function Home() {
                 estimatedLastChangeYear={result.estimated_last_change_year}
                 message={result.message}
                 coordinates={analyzedCoordinates}
+                ownerName={ownerName}
               />
             </section>
 

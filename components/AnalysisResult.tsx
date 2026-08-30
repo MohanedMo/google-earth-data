@@ -8,6 +8,7 @@ interface AnalysisResultProps {
   estimatedLastChangeYear: number | null;
   message?: string;
   coordinates?: [number, number][] | null;
+  ownerName?: string;
 }
 
 export default function AnalysisResult({
@@ -16,6 +17,7 @@ export default function AnalysisResult({
   estimatedLastChangeYear,
   message,
   coordinates,
+  ownerName,
 }: AnalysisResultProps) {
   if (!success) return null;
 
@@ -32,7 +34,7 @@ export default function AnalysisResult({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-200/60 pb-6 print:pb-1.5 print:border-b-2 print:border-black">
         <div>
           <h2 className="text-xl font-bold text-neutral-900 print:text-base print:font-black print:text-black">
-            تحليل المبنى
+            تقرير تحليل تاريخ المبنى
           </h2>
           <p className="text-xs text-neutral-500 mt-1 print:text-[10px] print:font-bold print:text-neutral-800">
             تقرير تقديري رسمي قائم على صور الأقمار الصناعية وGoogle Earth
@@ -71,6 +73,20 @@ export default function AnalysisResult({
           </button>
         </div>
       </div>
+
+      {ownerName && (
+        <div className="p-3 md:p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200/80 flex items-center justify-between print:bg-white print:border print:border-black print:p-2 print:rounded-lg">
+          <div className="flex items-center gap-2">
+            <span className="text-sm print:text-xs">👤</span>
+            <span className="text-xs print:text-[10px] font-bold text-neutral-600 print:text-black">
+              صاحب الطلب / المبني:
+            </span>
+          </div>
+          <span className="text-sm print:text-xs font-black text-amber-900 print:text-black font-mono">
+            {ownerName}
+          </span>
+        </div>
+      )}
 
       {coordinates && coordinates.length > 0 && (
         <div className="p-4 md:p-5 rounded-2xl bg-neutral-50/70 border border-neutral-200/80 print:bg-white print:border print:border-black print:p-2 print:rounded-lg">
