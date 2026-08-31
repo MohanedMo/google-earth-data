@@ -19,10 +19,11 @@ export default function AnalysisResult({
   coordinates,
   ownerName,
 }: AnalysisResultProps) {
+  const [isPreparingPrint, setIsPreparingPrint] = React.useState(false);
+
   if (!success) return null;
 
   const noBuildingDetected = !estimatedConstructionYear;
-  const [isPreparingPrint, setIsPreparingPrint] = React.useState(false);
 
   const handlePrint = async () => {
     if (typeof window !== "undefined" && !isPreparingPrint) {
