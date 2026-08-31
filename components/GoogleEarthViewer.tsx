@@ -129,7 +129,7 @@ export default function GoogleEarthViewer({
 
       const map = L.map(mapContainerRef.current, {
         center: [centerLat, centerLng],
-        zoom: 20,
+        zoom: 19,
         maxZoom: 22,
         zoomControl: false,
         attributionControl: false,
@@ -225,34 +225,46 @@ export default function GoogleEarthViewer({
           </div>
         `);
 
-      // Invalidate size after rendering and fit bounds with high zoom
+      // Invalidate size after rendering and fit bounds with zoom 19
       const fitAndRefresh = () => {
-        if (!map) return;
-        map.invalidateSize();
-        map.fitBounds(polygonLayer.getBounds(), {
-          padding: [30, 30],
-          maxZoom: 20,
-        });
+        if (!isMounted || !map || !mapContainerRef.current) return;
+        try {
+          if (map.getPane("mapPane") && mapContainerRef.current.offsetParent !== null) {
+            map.invalidateSize();
+            map.fitBounds(polygonLayer.getBounds(), {
+              padding: [70, 70],
+              maxZoom: 19,
+            });
+          }
+        } catch {
+          // Suppress transient Leaflet animation frame calculation during layout changes
+        }
       };
 
       const prepareForPrint = async () => {
-        if (!map || !mapContainerRef.current) return;
+        if (!isMounted || !map || !mapContainerRef.current) return;
         
-        const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-        const container = mapContainerRef.current;
-        const parent = container.parentElement;
+        try {
+          const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+          const container = mapContainerRef.current;
+          const parent = container.parentElement;
 
-        if (isMobile && parent) {
-          parent.style.width = "720px";
-          parent.style.maxWidth = "none";
-          container.style.width = "720px";
+          if (isMobile && parent) {
+            parent.style.width = "720px";
+            parent.style.maxWidth = "none";
+            container.style.width = "720px";
+          }
+
+          if (map.getPane("mapPane")) {
+            map.invalidateSize(true);
+            map.fitBounds(polygonLayer.getBounds(), {
+              padding: [65, 65],
+              maxZoom: 19,
+            });
+          }
+        } catch {
+          // Suppress error
         }
-
-        map.invalidateSize(true);
-        map.fitBounds(polygonLayer.getBounds(), {
-          padding: [25, 25],
-          maxZoom: 20,
-        });
 
         // Wait for all satellite tiles to load completely across the expanded width
         await new Promise<void>((resolve) => {
@@ -274,6 +286,7 @@ export default function GoogleEarthViewer({
             }
           }
 
+          const container = mapContainerRef.current;
           if (container) {
             const imgs = Array.from(
               container.querySelectorAll<HTMLImageElement>(
@@ -319,16 +332,22 @@ export default function GoogleEarthViewer({
       };
 
       const handleAfterPrint = () => {
-        if (!map || !mapContainerRef.current) return;
-        const container = mapContainerRef.current;
-        const parent = container.parentElement;
-        if (parent) {
-          parent.style.width = "";
-          parent.style.maxWidth = "";
+        if (!isMounted || !map || !mapContainerRef.current) return;
+        try {
+          const container = mapContainerRef.current;
+          const parent = container.parentElement;
+          if (parent) {
+            parent.style.width = "";
+            parent.style.maxWidth = "";
+          }
+          container.style.width = "";
+          if (map.getPane("mapPane")) {
+            map.invalidateSize(true);
+            fitAndRefresh();
+          }
+        } catch {
+          // Suppress error
         }
-        container.style.width = "";
-        map.invalidateSize(true);
-        fitAndRefresh();
       };
 
       (window as any).__prepareMapForPrint = prepareForPrint;
@@ -401,7 +420,7 @@ export default function GoogleEarthViewer({
     setActivePointIndex(idx);
     const coord = coordinates[idx];
     if (coord && leafletMapRef.current) {
-      leafletMapRef.current.flyTo([coord[1], coord[0]], 20);
+      leafletMapRef.current.flyTo([coord[1], coord[0]], 19);
       if (markersRef.current[idx]) {
         markersRef.current[idx].openPopup();
       }
@@ -565,7 +584,7 @@ export default function GoogleEarthViewer({
             type="button"
             onClick={() => {
               if (leafletMapRef.current) {
-                leafletMapRef.current.flyTo([centerLat, centerLng], 20);
+                leafletMapRef.current.flyTo([centerLat, centerLng], 19);
               }
             }}
             title="إعادة التركيز على مركز الـ 4 نقاط"
