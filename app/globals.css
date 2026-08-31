@@ -88,10 +88,23 @@ body {
   .leaflet-container,
   .leaflet-pane,
   .leaflet-tile,
+  .leaflet-tile-container,
   .leaflet-marker-pane,
   .leaflet-overlay-pane {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+  }
+
+  .leaflet-tile,
+  .leaflet-tile-container,
+  .leaflet-tile-container img {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .leaflet-container {
+    background-color: #0b0c10 !important;
+    width: 100% !important;
   }
 
   .no-print {

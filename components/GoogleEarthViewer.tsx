@@ -56,7 +56,7 @@ export default function GoogleEarthViewer({
       <Point>
         <coordinates>${lng},${lat},0</coordinates>
       </Point>
-    </Placemark>`
+    </Placemark>`,
       )
       .join("");
 
@@ -149,7 +149,7 @@ export default function GoogleEarthViewer({
 
       // Polygon connecting the 4 points
       const latLngs = coordinates.map(
-        ([lng, lat]) => [lat, lng] as [number, number]
+        ([lng, lat]) => [lat, lng] as [number, number],
       );
 
       const polygonLayer = L.polygon(latLngs, {
@@ -217,8 +217,7 @@ export default function GoogleEarthViewer({
         iconAnchor: [8, 8],
       });
 
-      L.marker([centerLat, centerLng], { icon: centerIcon })
-        .addTo(map)
+      L.marker([centerLat, centerLng], { icon: centerIcon }).addTo(map)
         .bindPopup(`
           <div style="direction: rtl; text-align: right; font-family: system-ui, sans-serif; font-size: 11px;">
             <b>مركز مساحة المبنى</b><br/>
@@ -230,20 +229,154 @@ export default function GoogleEarthViewer({
       const fitAndRefresh = () => {
         if (!map) return;
         map.invalidateSize();
-        map.fitBounds(polygonLayer.getBounds(), { padding: [30, 30], maxZoom: 20 });
+        map.fitBounds(polygonLayer.getBounds(), {
+          padding: [30, 30],
+          maxZoom: 20,
+        });
       };
+
+      const prepareForPrint = async () => {
+        if (!map || !mapContainerRef.current) return;
+        
+        const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+        const container = mapContainerRef.current;
+        const parent = container.parentElement;
+
+        if (isMobile && parent) {
+          parent.style.width = "720px";
+          parent.style.maxWidth = "none";
+          container.style.width = "720px";
+        }
+
+        map.invalidateSize(true);
+        map.fitBounds(polygonLayer.getBounds(), {
+          padding: [25, 25],
+          maxZoom: 20,
+        });
+
+        // Wait for all satellite tiles to load completely across the expanded width
+        await new Promise<void>((resolve) => {
+          let done = false;
+          const finish = () => {
+            if (!done) {
+              done = true;
+              resolve();
+            }
+          };
+
+          if (tileLayerInstance) {
+            if (!tileLayerInstance.isLoading()) {
+              setTimeout(finish, 400);
+            } else {
+              tileLayerInstance.once("load", () => {
+                setTimeout(finish, 400);
+              });
+            }
+          }
+
+          if (container) {
+            const imgs = Array.from(
+              container.querySelectorAll<HTMLImageElement>(
+                ".leaflet-tile-pane img",
+              ),
+            );
+            if (imgs.length > 0) {
+              let loaded = 0;
+              imgs.forEach((img) => {
+                if (img.complete && img.naturalWidth > 0) {
+                  loaded++;
+                } else {
+                  img.addEventListener(
+                    "load",
+                    () => {
+                      loaded++;
+                      if (loaded >= imgs.length) finish();
+                    },
+                    { once: true },
+                  );
+                  img.addEventListener(
+                    "error",
+                    () => {
+                      loaded++;
+                      if (loaded >= imgs.length) finish();
+                    },
+                    { once: true },
+                  );
+                }
+              });
+              if (loaded >= imgs.length) {
+                setTimeout(finish, 400);
+              }
+            }
+          }
+
+          setTimeout(finish, 2200);
+        });
+      };
+
+      const handleBeforePrint = () => {
+        prepareForPrint();
+      };
+
+      const handleAfterPrint = () => {
+        if (!map || !mapContainerRef.current) return;
+        const container = mapContainerRef.current;
+        const parent = container.parentElement;
+        if (parent) {
+          parent.style.width = "";
+          parent.style.maxWidth = "";
+        }
+        container.style.width = "";
+        map.invalidateSize(true);
+        fitAndRefresh();
+      };
+
+      (window as any).__prepareMapForPrint = prepareForPrint;
+      (window as any).__restoreMapAfterPrint = handleAfterPrint;
 
       fitAndRefresh();
       const timer1 = setTimeout(fitAndRefresh, 150);
       const timer2 = setTimeout(fitAndRefresh, 450);
 
       window.addEventListener("resize", fitAndRefresh);
+      window.addEventListener("beforeprint", handleBeforePrint);
+      window.addEventListener("afterprint", handleAfterPrint);
+
+      let printMediaQuery: MediaQueryList | null = null;
+      const handlePrintChange = (e: MediaQueryListEvent) => {
+        if (e.matches) {
+          handleBeforePrint();
+        } else {
+          handleAfterPrint();
+        }
+      };
+
+      if (typeof window !== "undefined" && window.matchMedia) {
+        printMediaQuery = window.matchMedia("print");
+        try {
+          printMediaQuery.addEventListener("change", handlePrintChange);
+        } catch {
+          (printMediaQuery as any).addListener?.(handlePrintChange);
+        }
+      }
+
       leafletMapRef.current = map;
 
       return () => {
+        delete (window as any).__prepareMapForPrint;
+        delete (window as any).__restoreMapAfterPrint;
         clearTimeout(timer1);
         clearTimeout(timer2);
         window.removeEventListener("resize", fitAndRefresh);
+        window.removeEventListener("beforeprint", handleBeforePrint);
+        window.removeEventListener("afterprint", handleAfterPrint);
+        if (printMediaQuery) {
+          try {
+            printMediaQuery.removeEventListener("change", handlePrintChange);
+          } catch {
+            (printMediaQuery as any).removeListener?.(handlePrintChange);
+          }
+        }
       };
     });
 
@@ -293,7 +426,8 @@ export default function GoogleEarthViewer({
             </h2>
           </div>
           <p className="text-xs text-neutral-400 print:text-xs print:font-bold print:text-neutral-900">
-            صور الأقمار الصناعية البصرية الطبيعية عالية الدقة مع دبابيس ومحيط الموقع
+            صور الأقمار الصناعية البصرية الطبيعية عالية الدقة مع دبابيس ومحيط
+            الموقع
           </p>
         </div>
 
@@ -362,9 +496,13 @@ export default function GoogleEarthViewer({
       {/* Layer Switcher Bar */}
       <div className="bg-[#14151a] px-4 py-2.5 border-b border-[#262832] flex items-center justify-between text-xs print:bg-neutral-100 print:border-b-2 print:border-black print:text-black print:px-3 print:py-1.5">
         <div className="flex items-center gap-2">
-          <span className="text-neutral-400 print:text-black print:font-bold print:text-xs">نمط الخريطة:</span>
+          <span className="text-neutral-400 print:text-black print:font-bold print:text-xs">
+            نمط الخريطة:
+          </span>
           <span className="hidden print:inline text-black font-black print:text-xs">
-            {mapLayer === "hybrid" ? "فضائي مع التسميات (Hybrid)" : "فضائي نقي (Google Earth)"}
+            {mapLayer === "hybrid"
+              ? "فضائي مع التسميات (Hybrid)"
+              : "فضائي نقي (Google Earth)"}
           </span>
           <div className="inline-flex rounded-lg bg-[#1e1f26] p-0.5 border border-neutral-700 no-print">
             <button
@@ -398,7 +536,7 @@ export default function GoogleEarthViewer({
       </div>
 
       {/* Map Viewport */}
-      <div className="relative w-full h-[460px] md:h-[540px] print:h-[350px] bg-[#0b0c10]">
+      <div className="relative w-full h-[460px] md:h-[540px] print:h-[350px] bg-[#0b0c10] overflow-hidden">
         {/* Leaflet Mount Container */}
         <div ref={mapContainerRef} className="w-full h-full" />
 
@@ -491,12 +629,20 @@ export default function GoogleEarthViewer({
 
                 <div className="font-mono text-[11px] text-neutral-300 space-y-0.5 mb-3 print:mb-0 print:text-black print:space-y-1.5">
                   <div className="flex justify-between items-center">
-                    <span className="print:text-neutral-900 print:font-bold print:text-xs">العرض:</span>
-                    <strong className="text-amber-300 print:text-black print:font-black print:text-sm">{lat}</strong>
+                    <span className="print:text-neutral-900 print:font-bold print:text-xs">
+                      العرض:
+                    </span>
+                    <strong className="text-amber-300 print:text-black print:font-black print:text-sm">
+                      {lat}
+                    </strong>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="print:text-neutral-900 print:font-bold print:text-xs">الطول:</span>
-                    <strong className="text-amber-300 print:text-black print:font-black print:text-sm">{lng}</strong>
+                    <span className="print:text-neutral-900 print:font-bold print:text-xs">
+                      الطول:
+                    </span>
+                    <strong className="text-amber-300 print:text-black print:font-black print:text-sm">
+                      {lng}
+                    </strong>
                   </div>
                 </div>
 

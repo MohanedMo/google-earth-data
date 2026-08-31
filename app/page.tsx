@@ -18,7 +18,7 @@ export default function Home() {
 
   const handleAnalyze = async (
     coordinates: [number, number][],
-    name?: string
+    name?: string,
   ) => {
     setIsLoading(true);
     setError(null);
@@ -35,7 +35,7 @@ export default function Home() {
           finalResponse.estimated_construction_year === undefined
         ) {
           const validItems = (finalResponse.timeline || []).filter(
-            (t) => t.ndbi !== null
+            (t) => t.ndbi !== null,
           );
           if (validItems.length > 0) {
             const maxVal = Math.max(...validItems.map((t) => t.ndbi!));
@@ -77,7 +77,8 @@ export default function Home() {
             محلل تاريخ المباني
           </h1>
           <p className="text-sm md:text-base text-neutral-600 max-w-xl mx-auto leading-relaxed print:text-sm print:font-bold print:text-black print:mx-0">
-            تقرير تحليلي رسمي لتقدير تاريخ البناء مع معاينة Google Earth المباشرة للأركان
+            تقرير تحليلي رسمي لتقدير تاريخ البناء مع معاينة Google Earth
+            المباشرة للأركان
           </p>
         </header>
 
@@ -134,20 +135,24 @@ export default function Home() {
 
             {/* 2. Live Google Earth Preview for the 4 Points (Page 1) */}
             {analyzedCoordinates && (
-              <section id="earth-live-view" className="print-avoid-break print:mt-4">
+              <section
+                id="earth-live-view"
+                className="print-avoid-break print:mt-4"
+              >
                 <GoogleEarthViewer
                   coordinates={analyzedCoordinates}
                   timeline={result.timeline}
-                  estimatedConstructionYear={
-                    result.estimated_construction_year
-                  }
+                  estimatedConstructionYear={result.estimated_construction_year}
                   estimatedLastChangeYear={result.estimated_last_change_year}
                 />
               </section>
             )}
 
             {/* 3. Timeline Table Details Section (Page 2) */}
-            <section id="timeline" className="print-break-before print-avoid-break print:pt-4">
+            <section
+              id="timeline"
+              className="print-break-before print-avoid-break print:pt-4"
+            >
               <Timeline
                 timeline={result.timeline}
                 estimatedConstructionYear={result.estimated_construction_year}
@@ -159,7 +164,8 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="w-full text-center text-[11px] text-neutral-400 border-t border-neutral-200 pt-6 mt-auto print:mt-6 print:pt-4 print:text-[10px]">
-        &copy; {new Date().getFullYear()} محلل تاريخ المباني &bull; تم إنشاء التقرير عبر الأقمار الصناعية وGoogle Earth
+        &copy; {new Date().getFullYear()} محلل تاريخ المباني &bull; تم إنشاء
+        التقرير عبر الأقمار الصناعية وGoogle Earth
       </footer>
     </main>
   );
