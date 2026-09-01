@@ -145,6 +145,7 @@ export default function GoogleEarthViewer({
         maxZoom: 22,
         maxNativeZoom: 20,
         subdomains: ["mt0", "mt1", "mt2", "mt3"],
+        keepBuffer: 6,
       }).addTo(map);
 
       // Polygon connecting the 4 points
@@ -243,87 +244,88 @@ export default function GoogleEarthViewer({
 
       const prepareForPrint = async () => {
         if (!isMounted || !map || !mapContainerRef.current) return;
-        
+
         try {
           const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
           const container = mapContainerRef.current;
           const parent = container.parentElement;
 
           if (isMobile && parent) {
-            parent.style.width = "720px";
+            parent.style.width = "750px";
             parent.style.maxWidth = "none";
-            container.style.width = "720px";
+            container.style.width = "750px";
           }
 
           if (map.getPane("mapPane")) {
-            map.invalidateSize(true);
+            map.invalidateSize({ animate: false });
             map.fitBounds(polygonLayer.getBounds(), {
               padding: [65, 65],
               maxZoom: 19,
+              animate: false,
             });
           }
         } catch {
           // Suppress error
         }
 
-        // Wait for all satellite tiles to load completely across the expanded width
+        // Wait for Leaflet to mount and download all satellite tiles across the expanded width
         await new Promise<void>((resolve) => {
-          let done = false;
+          let isDone = false;
           const finish = () => {
-            if (!done) {
-              done = true;
+            if (!isDone) {
+              isDone = true;
               resolve();
             }
           };
 
-          if (tileLayerInstance) {
-            if (!tileLayerInstance.isLoading()) {
-              setTimeout(finish, 400);
-            } else {
-              tileLayerInstance.once("load", () => {
-                setTimeout(finish, 400);
-              });
+          // Step 1: Wait a brief moment for Leaflet to add new <img> elements to DOM
+          setTimeout(() => {
+            if (isDone) return;
+            const container = mapContainerRef.current;
+            if (!container) {
+              finish();
+              return;
             }
-          }
 
-          const container = mapContainerRef.current;
-          if (container) {
             const imgs = Array.from(
               container.querySelectorAll<HTMLImageElement>(
                 ".leaflet-tile-pane img",
               ),
             );
-            if (imgs.length > 0) {
-              let loaded = 0;
-              imgs.forEach((img) => {
-                if (img.complete && img.naturalWidth > 0) {
-                  loaded++;
-                } else {
-                  img.addEventListener(
-                    "load",
-                    () => {
-                      loaded++;
-                      if (loaded >= imgs.length) finish();
-                    },
-                    { once: true },
-                  );
-                  img.addEventListener(
-                    "error",
-                    () => {
-                      loaded++;
-                      if (loaded >= imgs.length) finish();
-                    },
-                    { once: true },
-                  );
-                }
-              });
-              if (loaded >= imgs.length) {
-                setTimeout(finish, 400);
-              }
-            }
-          }
 
-          setTimeout(finish, 2200);
+            if (imgs.length === 0) {
+              setTimeout(finish, 800);
+              return;
+            }
+
+            // Wait for all tile images to complete loading and decoding
+            const promises = imgs.map((img) => {
+              if (img.complete && img.naturalWidth > 0) {
+                return Promise.resolve();
+              }
+              return new Promise<void>((imgResolve) => {
+                const onLoaded = () => {
+                  img.removeEventListener("load", onLoaded);
+                  img.removeEventListener("error", onLoaded);
+                  if (img.decode) {
+                    img.decode().catch(() => {}).finally(imgResolve);
+                  } else {
+                    imgResolve();
+                  }
+                };
+                img.addEventListener("load", onLoaded, { once: true });
+                img.addEventListener("error", onLoaded, { once: true });
+              });
+            });
+
+            Promise.all(promises).then(() => {
+              // Wait an extra frame for rasterization onto GPU
+              setTimeout(finish, 350);
+            });
+          }, 180);
+
+          // Absolute fallback timeout
+          setTimeout(finish, 3500);
         });
       };
 
@@ -555,9 +557,12 @@ export default function GoogleEarthViewer({
       </div>
 
       {/* Map Viewport */}
-      <div className="relative w-full h-[460px] md:h-[540px] print:h-[350px] bg-[#0b0c10] overflow-hidden">
+      <div
+        className="relative w-full h-[460px] md:h-[540px] print:h-[350px] bg-[#0b0c10] overflow-hidden"
+        dir="ltr"
+      >
         {/* Leaflet Mount Container */}
-        <div ref={mapContainerRef} className="w-full h-full" />
+        <div ref={mapContainerRef} className="w-full h-full" dir="ltr" />
 
         {/* Floating Zoom & Center Buttons (Bottom Left) */}
         <div className="absolute bottom-6 left-6 z-20 flex flex-col gap-2 no-print">
