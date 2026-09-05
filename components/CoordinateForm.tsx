@@ -12,13 +12,13 @@ interface CoordinateFormProps {
 }
 
 const DEFAULT_POINTS: Point[] = [
-  { lat: '30.45365', lng: '31.55186' },
-  { lat: '30.45374', lng: '31.55193' },
-  { lat: '30.45377', lng: '31.551802' },
-  { lat: '30.45369', lng: '31.55175' },
+  { lat: '30.70815', lng: '31.38292' },
+  { lat: '30.70823', lng: '31.38294' },
+  { lat: '30.70821', lng: '31.38306' },
+  { lat: '30.70813', lng: '31.38304' },
 ];
 
-const STORAGE_KEY = 'building_coordinates_points';
+const STORAGE_KEY = 'building_coordinates_points_v3';
 const NAME_STORAGE_KEY = 'building_owner_name';
 
 export default function CoordinateForm({ onAnalyze, isLoading }: CoordinateFormProps) {
