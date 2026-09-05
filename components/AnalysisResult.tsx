@@ -84,8 +84,8 @@ export default function AnalysisResult({
   return (
     <div className="w-full max-w-4xl mx-auto mt-8 p-6 md:p-8 rounded-3xl bg-white border border-neutral-200/90 shadow-lg shadow-neutral-100 animate-fade-in space-y-6 print:shadow-none print:border-2 print:border-black print:p-3 print:m-0 print:rounded-xl print:space-y-2 print-avoid-break">
       {/* Executive Header Section */}
-      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 pb-5 border-b border-neutral-200/80 print:pb-2 print:border-b-2 print:border-black">
-        <div className="space-y-2 flex-1">
+      <div className="flex flex-col md:flex-row print:flex-row md:items-start print:items-center justify-between print:justify-between gap-4 pb-5 border-b border-neutral-200/80 print:pb-2 print:border-b-2 print:border-black">
+        <div className="space-y-2 flex-1 print:text-right">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-6 rounded-full bg-amber-500 print:bg-black inline-block" />
             <h2 className="text-2xl md:text-3xl font-black text-neutral-900 tracking-tight print:text-base print:font-black print:text-black">
@@ -101,63 +101,63 @@ export default function AnalysisResult({
               Google Earth
             </bdi>
           </p>
-
-          {/* Info Badge (Owner Name) */}
-          {ownerName && (
-            <div className="pt-1">
-              <div className="p-3 rounded-2xl inline-flex items-center gap-2 bg-neutral-50 border border-neutral-200/90 print:bg-white print:border print:border-black print:p-2 print:rounded-lg">
-                <span className="text-base print:text-[14px]">👤</span>
-                <span className="text-xs print:text-[18px] font-bold text-neutral-600 print:text-black whitespace-nowrap">
-                  صاحب الطلب:
-                </span>
-                <span className="text-lg print:text-[20px] font-black text-amber-900 print:text-black">
-                  {ownerName}
-                </span>
-              </div>
-            </div>
-          )}
         </div>
 
-        <div className="flex items-center flex-wrap gap-2.5 self-start md:self-center">
-          <div className="no-print flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold">
-            <span className="relative flex h-2.5 w-2.5 no-print">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
-            </span>
-            <span>اكتمل التحليل ✓</span>
+        <div className="flex flex-col items-start md:items-end print:items-end gap-2.5 self-start md:self-center print:self-center print:mr-auto print:ml-0">
+          {/* Info Badge (Owner Name) - Positioned on the left */}
+          {ownerName && (
+            <div className="p-2.5 md:p-3 rounded-2xl inline-flex items-center gap-2 bg-neutral-50 border border-neutral-200/90 print:bg-white print:border print:border-black print:p-2 print:rounded-lg">
+              <span className="text-base print:text-[14px]">👤</span>
+              <span className="text-xs print:text-[16px] font-bold text-neutral-600 print:text-black whitespace-nowrap">
+                صاحب الطلب:
+              </span>
+              <span className="text-base md:text-lg print:text-[18px] font-black text-amber-900 print:text-black whitespace-nowrap">
+                {ownerName}
+              </span>
+            </div>
+          )}
+
+          <div className="flex items-center flex-wrap gap-2.5 no-print">
+            <div className="no-print flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold">
+              <span className="relative flex h-2.5 w-2.5 no-print">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+              </span>
+              <span>اكتمل التحليل ✓</span>
+            </div>
+            <button
+              type="button"
+              onClick={handlePrint}
+              disabled={isPreparingPrint}
+              title="حفظ أو طباعة التقرير بصيغة PDF"
+              className="no-print inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 active:bg-black disabled:opacity-70 text-white text-xs font-semibold shadow-sm transition-all duration-200 cursor-pointer"
+            >
+              {isPreparingPrint ? (
+                <>
+                  <span className="w-3.5 h-3.5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+                  <span>جاري تجهيز الخريطة...</span>
+                </>
+              ) : (
+                <>
+                  <svg
+                    className="w-4 h-4 text-amber-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  <span>حفظ التقرير كـ PDF</span>
+                </>
+              )}
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={handlePrint}
-            disabled={isPreparingPrint}
-            title="حفظ أو طباعة التقرير بصيغة PDF"
-            className="no-print inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 active:bg-black disabled:opacity-70 text-white text-xs font-semibold shadow-sm transition-all duration-200 cursor-pointer"
-          >
-            {isPreparingPrint ? (
-              <>
-                <span className="w-3.5 h-3.5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
-                <span>جاري تجهيز الخريطة...</span>
-              </>
-            ) : (
-              <>
-                <svg
-                  className="w-4 h-4 text-amber-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-                <span>حفظ التقرير كـ PDF</span>
-              </>
-            )}
-          </button>
         </div>
       </div>
 
@@ -331,6 +331,19 @@ export default function AnalysisResult({
           />
         </div>
       )}
+
+      {/* Official Military Survey / Building Age Tracking Note (Under Map on Page 1) */}
+      <div className="p-4 md:p-5 rounded-2xl bg-amber-500/10 border-2 border-amber-500/30 text-neutral-900 shadow-xs print:bg-white print:border-2 print:border-black print:p-2.5 print:rounded-lg print-avoid-break mt-3 print:mt-2">
+        <div className="flex items-center gap-2 mb-1.5 print:mb-1 border-b border-amber-500/20 pb-1.5 print:border-b print:border-black print:pb-1">
+          <span className="text-lg print:text-xs">⚖️</span>
+          <h3 className="text-sm md:text-base font-black text-amber-950 print:text-[11px] print:font-black print:text-black">
+            إفادة رسمية بشأن تتبع عمر المبنى:
+          </h3>
+        </div>
+        <p className="text-xs md:text-sm text-neutral-800 font-medium leading-relaxed text-justify print:text-[9.5px] print:font-bold print:text-black print:leading-snug">
+          فيما يخص تتبع عمر المبنى نتشرف بان نفيد سيادتكم علما بانه وفقا لاستخدامنا لبرنامج (Google Earth Pro) المجانى والصور قد طرأ تحديث بالبرنامج واصبح غير متاح لدينا صور فضائية لفترات زمنية متباعدة وبناءا على المحضر التنسيقى مع ادارة المساحة العسكرية والتى جاء بها ان التتبع الزمنى للمتغير هو شان المساحة العسكرية نظرا لاستخدامها تقنيات اعلى وادق فى التصوير الجوى والفضائى وتوافر الصور عالية الدقة لديها. فقد اصبح غير واضح لدينا تتبع اعمال المبنى محل الفحص حيث يظهر المبنى بشكل افقي ولا يسمح لنا بمعرفة عدد الادوار.
+        </p>
+      </div>
     </div>
   );
 }

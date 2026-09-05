@@ -625,7 +625,7 @@ export default function GoogleEarthViewer({
 
       {/* Map Viewport */}
       <div
-        className="relative w-full h-[400px] md:h-[460px] print:h-[420px] bg-[#0b0c10] overflow-hidden"
+        className="relative w-full h-[400px] md:h-[460px] print:h-[350px] bg-[#0b0c10] overflow-hidden"
         dir="ltr"
       >
         {/* Leaflet Mount Container */}
