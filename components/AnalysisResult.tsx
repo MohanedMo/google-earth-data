@@ -31,10 +31,6 @@ export default function AnalysisResult({
 }: AnalysisResultProps) {
   const [isPreparingPrint, setIsPreparingPrint] = React.useState(false);
 
-  if (!success) return null;
-
-  const noBuildingDetected = !estimatedConstructionYear;
-
   const localizedMessage = React.useMemo(() => {
     if (!message) return "";
     return message
@@ -43,6 +39,10 @@ export default function AnalysisResult({
       .replace(/\blow\b/gi, "منخفض")
       .replace(/\bnone\b/gi, "غير مؤكد");
   }, [message]);
+
+  if (!success) return null;
+
+  const noBuildingDetected = !estimatedConstructionYear;
 
   const handlePrint = async () => {
     if (typeof window !== "undefined" && !isPreparingPrint) {
