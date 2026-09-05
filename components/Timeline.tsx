@@ -43,7 +43,7 @@ export default function Timeline({
           الجدول الزمني للتحليل السنوي للموقع (من عام 2014 حتى الآن)
         </h2>
         <p className="text-xs text-neutral-500 mt-1 print:text-xs print:font-bold print:text-neutral-900">
-          القيم السنوية المتوسطة لمؤشر التشييد وبناء المنطقة من بيانات القمر الصناعي Sentinel-1
+          القيم السنوية المتوسطة لمؤشر التشييد وبناء المنطقة من بيانات صور الأقمار الصناعية
         </p>
       </div>
 

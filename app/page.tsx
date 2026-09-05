@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import CoordinateForm from "../components/CoordinateForm";
 import AnalysisResult from "../components/AnalysisResult";
-import GoogleEarthViewer from "../components/GoogleEarthViewer";
 import Timeline from "../components/Timeline";
 import { analyzeBuilding, AnalysisResponse } from "../lib/api";
 
@@ -29,29 +28,7 @@ export default function Home() {
     try {
       const response = await analyzeBuilding(coordinates);
       if (response.success) {
-        let finalResponse = { ...response };
-        if (
-          finalResponse.estimated_construction_year === null ||
-          finalResponse.estimated_construction_year === undefined
-        ) {
-          const validItems = (finalResponse.timeline || []).filter(
-            (t) => t.ndbi !== null,
-          );
-          if (validItems.length > 0) {
-            const maxVal = Math.max(...validItems.map((t) => t.ndbi!));
-            const peakYear = validItems.find((t) => t.ndbi === maxVal)?.year;
-            if (peakYear) {
-              finalResponse.estimated_construction_year = peakYear;
-              if (
-                !finalResponse.message ||
-                finalResponse.message.includes("لم يتم رصد")
-              ) {
-                finalResponse.message = `تم تقدير سنة البناء وفقاً لأعلى شدة ارتداد (100%) في عام ${peakYear}.`;
-              }
-            }
-          }
-        }
-        setResult(finalResponse);
+        setResult(response);
       } else {
         setError(response.error || "فشل في تحليل تاريخ المبنى.");
       }
@@ -130,25 +107,12 @@ export default function Home() {
                 message={result.message}
                 coordinates={analyzedCoordinates}
                 ownerName={ownerName}
+                variableId={result.variable_id}
+                matchedVariables={result.matched_variables}
               />
             </section>
 
-            {/* 2. Live Google Earth Preview for the 4 Points (Page 1) */}
-            {analyzedCoordinates && (
-              <section
-                id="earth-live-view"
-                className="print-avoid-break print:mt-4"
-              >
-                <GoogleEarthViewer
-                  coordinates={analyzedCoordinates}
-                  timeline={result.timeline}
-                  estimatedConstructionYear={result.estimated_construction_year}
-                  estimatedLastChangeYear={result.estimated_last_change_year}
-                />
-              </section>
-            )}
-
-            {/* 3. Timeline Table Details Section (Page 2) */}
+            {/* 2. Timeline Table Details Section (Page 2) */}
             <section
               id="timeline"
               className="print-break-before print-avoid-break print:pt-4"

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import GoogleEarthViewer from "./GoogleEarthViewer";
 
 interface AnalysisResultProps {
   success: boolean;
@@ -9,6 +10,13 @@ interface AnalysisResultProps {
   message?: string;
   coordinates?: [number, number][] | null;
   ownerName?: string;
+  variableId?: number | string | null;
+  matchedVariables?: {
+    id: number | string;
+    lat: number;
+    lng: number;
+    date?: string;
+  }[];
 }
 
 export default function AnalysisResult({
@@ -18,12 +26,23 @@ export default function AnalysisResult({
   message,
   coordinates,
   ownerName,
+  variableId,
+  matchedVariables,
 }: AnalysisResultProps) {
   const [isPreparingPrint, setIsPreparingPrint] = React.useState(false);
 
   if (!success) return null;
 
   const noBuildingDetected = !estimatedConstructionYear;
+
+  const localizedMessage = React.useMemo(() => {
+    if (!message) return "";
+    return message
+      .replace(/\bhigh\b/gi, "مرتفع")
+      .replace(/\bmedium\b/gi, "متوسط")
+      .replace(/\blow\b/gi, "منخفض")
+      .replace(/\bnone\b/gi, "غير مؤكد");
+  }, [message]);
 
   const handlePrint = async () => {
     if (typeof window !== "undefined" && !isPreparingPrint) {
@@ -66,7 +85,7 @@ export default function AnalysisResult({
     <div className="w-full max-w-4xl mx-auto mt-8 p-6 md:p-8 rounded-3xl bg-white border border-neutral-200/90 shadow-lg shadow-neutral-100 animate-fade-in space-y-6 print:shadow-none print:border-2 print:border-black print:p-3 print:m-0 print:rounded-xl print:space-y-2 print-avoid-break">
       {/* Executive Header Section */}
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 pb-5 border-b border-neutral-200/80 print:pb-2 print:border-b-2 print:border-black">
-        <div className="space-y-1.5 flex-1">
+        <div className="space-y-2 flex-1">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-6 rounded-full bg-amber-500 print:bg-black inline-block" />
             <h2 className="text-2xl md:text-3xl font-black text-neutral-900 tracking-tight print:text-base print:font-black print:text-black">
@@ -83,24 +102,17 @@ export default function AnalysisResult({
             </bdi>
           </p>
 
-          {/* Owner / Client Name Badge */}
+          {/* Info Badge (Owner Name) */}
           {ownerName && (
-            <div className="p-3 md:p-3.5 rounded-2xl flex items-center justify-between gap-2 print:bg-white print:border print:border-black print:p-2 print:rounded-lg">
-              <div className="flex items-center gap-2">
-                <span className="text-md print:text-[15px]">👤</span>
-                <span className="text-[15px] print:text-[20px] font-bold text-neutral-600 print:text-black">
-                  صاحب الطلب / المبني:
+            <div className="pt-1">
+              <div className="p-3 rounded-2xl inline-flex items-center gap-2 bg-neutral-50 border border-neutral-200/90 print:bg-white print:border print:border-black print:p-2 print:rounded-lg">
+                <span className="text-base print:text-[14px]">👤</span>
+                <span className="text-xs print:text-[18px] font-bold text-neutral-600 print:text-black whitespace-nowrap">
+                  صاحب الطلب:
                 </span>
-                <span className="text-[20px] print:text-[20px] font-black text-amber-900 print:text-black">
+                <span className="text-lg print:text-[20px] font-black text-amber-900 print:text-black">
                   {ownerName}
                 </span>
-              </div>
-              <div className="hidden print:flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold print:bg-white print:border print:border-black print:text-black print:font-black print:text-[10px] print:px-2 print:py-0.5">
-                <span className="relative flex h-2.5 w-2.5 no-print">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
-                </span>
-                <span>اكتمل التحليل ✓</span>
               </div>
             </div>
           )}
@@ -195,10 +207,56 @@ export default function AnalysisResult({
         </div>
       )}
 
+      {/* Military Survey Variable Detection Notice (commented out from frontend display)
+      {matchedVariables && matchedVariables.length > 0 ? (
+        <div className="p-5 md:p-6 rounded-2xl bg-amber-500/10 border-2 border-amber-500/40 text-neutral-900 shadow-sm print:bg-white print:border-2 print:border-black print:p-3 print:rounded-lg print-avoid-break">
+          <div className="flex items-center gap-2.5 mb-2.5 print:mb-1.5">
+            <span className="text-xl print:text-[18px]">🎖️</span>
+            <h3 className="text-base md:text-lg font-black text-amber-950 print:text-sm print:font-black print:text-black">
+              إفادة رصد المساحة العسكرية:
+            </h3>
+          </div>
+          <div className="space-y-2 print:space-y-1">
+            {matchedVariables.map((v, index) => (
+              <p
+                key={index}
+                className="text-base md:text-xl font-extrabold text-neutral-900 print:text-[14px] print:font-black print:text-black leading-relaxed"
+              >
+                العقار تم رصده من قبل المساحه العسكريه برقم متغير{" "}
+                <span className="font-mono font-black text-lg md:text-2xl text-amber-900 print:text-black print:text-[15px] px-1.5 py-0.5 bg-amber-100 rounded-lg print:bg-transparent print:p-0">
+                  {v.id}
+                </span>{" "}
+                بتاريخ{" "}
+                <span className="font-mono font-black text-lg md:text-2xl text-amber-900 print:text-black print:text-[15px] px-1.5 py-0.5 bg-amber-100 rounded-lg print:bg-transparent print:p-0">
+                  {v.date || "غير محدد"}
+                </span>
+              </p>
+            ))}
+          </div>
+        </div>
+      ) : variableId ? (
+        <div className="p-5 md:p-6 rounded-2xl bg-amber-500/10 border-2 border-amber-500/40 text-neutral-900 shadow-sm print:bg-white print:border-2 print:border-black print:p-3 print:rounded-lg print-avoid-break">
+          <div className="flex items-center gap-2.5 mb-2.5 print:mb-1.5">
+            <span className="text-xl print:text-[18px]">🎖️</span>
+            <h3 className="text-base md:text-lg font-black text-amber-950 print:text-sm print:font-black print:text-black">
+              إفادة رصد المساحة العسكرية:
+            </h3>
+          </div>
+          <p className="text-base md:text-xl font-extrabold text-neutral-900 print:text-[14px] print:font-black print:text-black leading-relaxed">
+            العقار تم رصده من قبل المساحه العسكريه برقم متغير{" "}
+            <span className="font-mono font-black text-lg md:text-2xl text-amber-900 print:text-black print:text-[15px] px-1.5 py-0.5 bg-amber-100 rounded-lg print:bg-transparent print:p-0">
+              {variableId}
+            </span>
+          </p>
+        </div>
+      ) : null}
+      */}
+
       {noBuildingDetected ? (
         <div className="py-6 text-center text-neutral-500 print:py-2 print:text-black">
           <p className="text-base font-medium print:text-sm print:font-black print:text-black">
-            {message || "لم يتم رصد نشاط بناء واضح في المنطقة المحددة."}
+            {localizedMessage ||
+              "لم يتم رصد نشاط بناء واضح في المنطقة المحددة."}
           </p>
           <p className="text-xs text-neutral-400 mt-1 print:text-[10px] print:font-bold print:text-neutral-800">
             جرّب تحديد منطقة أخرى أو ضبط الإحداثيات لتكون أقرب إلى هيكل المبنى.
@@ -206,7 +264,7 @@ export default function AnalysisResult({
         </div>
       ) : (
         <>
-          {message && (
+          {localizedMessage && (
             <div className="p-5 rounded-2xl bg-neutral-50 border border-neutral-200 text-sm text-neutral-600 leading-relaxed flex items-start gap-3 print:bg-white print:border print:border-black print:p-2 print:rounded-lg print:text-black">
               <span className="text-lg select-none mt-0.5 print:text-sm">
                 📢
@@ -216,7 +274,7 @@ export default function AnalysisResult({
                   ملخص التحليل:
                 </strong>
                 <span className="print:text-[10.5px] print:font-bold print:text-black leading-relaxed">
-                  {message}
+                  {localizedMessage}
                 </span>
               </div>
             </div>
@@ -261,6 +319,17 @@ export default function AnalysisResult({
             </div>
           </div>
         </>
+      )}
+
+      {/* Live Google Earth Map embedded directly in the report */}
+      {coordinates && coordinates.length > 0 && (
+        <div className="pt-2 print:pt-1">
+          <GoogleEarthViewer
+            coordinates={coordinates}
+            variableId={variableId}
+            matchedVariables={matchedVariables}
+          />
+        </div>
       )}
     </div>
   );

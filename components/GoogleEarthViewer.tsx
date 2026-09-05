@@ -8,6 +8,13 @@ interface GoogleEarthViewerProps {
   timeline?: TimelineItem[];
   estimatedConstructionYear?: number | null;
   estimatedLastChangeYear?: number | null;
+  variableId?: number | string | null;
+  matchedVariables?: {
+    id: number | string;
+    lat: number;
+    lng: number;
+    date?: string;
+  }[];
 }
 
 export default function GoogleEarthViewer({
@@ -15,6 +22,8 @@ export default function GoogleEarthViewer({
   timeline = [],
   estimatedConstructionYear,
   estimatedLastChangeYear,
+  variableId,
+  matchedVariables = [],
 }: GoogleEarthViewerProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const leafletMapRef = useRef<any>(null);
@@ -60,6 +69,21 @@ export default function GoogleEarthViewer({
       )
       .join("");
 
+    /*
+    const variablePlacemarks = (matchedVariables || [])
+      .map(
+        (v) => `
+    <Placemark>
+      <name>رقم المتغير: ${v.id}</name>
+      <description>نقطة متغير داخل مساحة المبنى&#10;رقم المتغير: ${v.id}${v.date ? `&#10;تاريخ الرصد: ${v.date}` : ""}&#10;خط العرض: ${v.lat}&#10;خط الطول: ${v.lng}</description>
+      <Point>
+        <coordinates>${v.lng},${v.lat},0</coordinates>
+      </Point>
+    </Placemark>`,
+      )
+      .join("");
+    */
+
     const kmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
   <Document>
@@ -90,7 +114,7 @@ export default function GoogleEarthViewer({
     ${placemarks}
     <Placemark>
       <name>🎯 مركز المبنى</name>
-      <description>سنة البناء التقديرية: ${estimatedConstructionYear || "غير محدد"}</description>
+      <description>سنة البناء التقديرية: ${estimatedConstructionYear || "غير محدد"}${variableId ? `&#10;رقم المتغير: ${variableId}` : ""}</description>
       <Point>
         <coordinates>${centerLng},${centerLat},0</coordinates>
       </Point>
@@ -129,7 +153,7 @@ export default function GoogleEarthViewer({
 
       const map = L.map(mapContainerRef.current, {
         center: [centerLat, centerLng],
-        zoom: 19,
+        zoom: 20,
         maxZoom: 22,
         zoomControl: false,
         attributionControl: false,
@@ -226,15 +250,54 @@ export default function GoogleEarthViewer({
           </div>
         `);
 
-      // Invalidate size after rendering and fit bounds with zoom 19
+      /*
+      // Matched Variable Points inside polygon (commented out from frontend display)
+      if (matchedVariables && matchedVariables.length > 0) {
+        matchedVariables.forEach((v) => {
+          const variableIcon = L.divIcon({
+            className: "ge-var-pin",
+            html: `
+              <div style="position: relative; display: flex; flex-direction: column; align-items: center; cursor: pointer;">
+                <div style="background: linear-gradient(135deg, #7c3aed, #4c1d95); color: #ffffff; padding: 2px 8px; border-radius: 12px; border: 2px solid #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 11px; font-family: monospace; box-shadow: 0 4px 12px rgba(76,29,149,0.7); white-space: nowrap;">
+                  <span>${v.id}</span>
+                </div>
+                <div style="width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #4c1d95; margin-top: -1px;"></div>
+              </div>
+            `,
+            iconSize: [50, 28],
+            iconAnchor: [25, 28],
+            popupAnchor: [0, -28],
+          });
+
+          L.marker([v.lat, v.lng], { icon: variableIcon }).addTo(map)
+            .bindPopup(`
+            <div style="direction: rtl; text-align: right; font-family: system-ui, sans-serif; min-width: 170px; padding: 4px;">
+              <div style="font-weight: 800; color: #5b21b6; font-size: 13px; margin-bottom: 4px;">
+                رقم المتغير: ${v.id}
+              </div>
+              <div style="font-size: 11px; font-family: monospace; color: #475569; line-height: 1.6;">
+                ${v.date ? `<div>تاريخ الرصد: <b>${v.date}</b></div>` : ""}
+                <div>العرض: <b>${v.lat}</b></div>
+                <div>الطول: <b>${v.lng}</b></div>
+              </div>
+            </div>
+          `);
+        });
+      }
+      */
+
+      // Invalidate size after rendering and fit bounds with zoom 20
       const fitAndRefresh = () => {
         if (!isMounted || !map || !mapContainerRef.current) return;
         try {
-          if (map.getPane("mapPane") && mapContainerRef.current.offsetParent !== null) {
+          if (
+            map.getPane("mapPane") &&
+            mapContainerRef.current.offsetParent !== null
+          ) {
             map.invalidateSize();
             map.fitBounds(polygonLayer.getBounds(), {
               padding: [70, 70],
-              maxZoom: 19,
+              maxZoom: 20,
             });
           }
         } catch {
@@ -246,7 +309,8 @@ export default function GoogleEarthViewer({
         if (!isMounted || !map || !mapContainerRef.current) return;
 
         try {
-          const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+          const isMobile =
+            typeof window !== "undefined" && window.innerWidth < 768;
           const container = mapContainerRef.current;
           const parent = container.parentElement;
 
@@ -259,8 +323,8 @@ export default function GoogleEarthViewer({
           if (map.getPane("mapPane")) {
             map.invalidateSize({ animate: false });
             map.fitBounds(polygonLayer.getBounds(), {
-              padding: [65, 65],
-              maxZoom: 19,
+              padding: [35, 35],
+              maxZoom: 20,
               animate: false,
             });
           }
@@ -308,7 +372,10 @@ export default function GoogleEarthViewer({
                   img.removeEventListener("load", onLoaded);
                   img.removeEventListener("error", onLoaded);
                   if (img.decode) {
-                    img.decode().catch(() => {}).finally(imgResolve);
+                    img
+                      .decode()
+                      .catch(() => {})
+                      .finally(imgResolve);
                   } else {
                     imgResolve();
                   }
@@ -408,7 +475,7 @@ export default function GoogleEarthViewer({
         leafletMapRef.current = null;
       }
     };
-  }, [coordinates, centerLat, centerLng, mapLayer]);
+  }, [coordinates, centerLat, centerLng, mapLayer, matchedVariables]);
 
   const zoomIn = () => {
     if (leafletMapRef.current) leafletMapRef.current.zoomIn();
@@ -422,7 +489,7 @@ export default function GoogleEarthViewer({
     setActivePointIndex(idx);
     const coord = coordinates[idx];
     if (coord && leafletMapRef.current) {
-      leafletMapRef.current.flyTo([coord[1], coord[0]], 19);
+      leafletMapRef.current.flyTo([coord[1], coord[0]], 20);
       if (markersRef.current[idx]) {
         markersRef.current[idx].openPopup();
       }
@@ -436,17 +503,17 @@ export default function GoogleEarthViewer({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto mt-6 rounded-3xl bg-[#111216] text-white border border-[#262832] shadow-2xl overflow-hidden relative select-none animate-fade-in print:rounded-2xl print:m-0 print:shadow-none print-avoid-break print:border-2 print:border-black print:bg-white print:text-black">
+    <div className="w-full mt-3 rounded-2xl bg-[#111216] text-white border border-[#262832] shadow-xl overflow-hidden relative select-none animate-fade-in print:rounded-lg print:m-0 print:shadow-none print-avoid-break print:border print:border-black print:bg-white print:text-black">
       {/* Header Bar */}
-      <div className="p-4 md:p-5 border-b border-[#262832] bg-[#1a1b22] flex flex-col md:flex-row md:items-center justify-between gap-4 print:bg-white print:border-b-2 print:border-black print:p-3">
+      <div className="p-4 md:p-5 border-b border-[#262832] bg-[#1a1b22] flex flex-col md:flex-row md:items-center justify-between gap-4 print:bg-white print:border-b print:border-black print:p-2">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="text-xl print:text-2xl">🌍</span>
-            <h2 className="text-lg font-bold text-white tracking-tight print:text-base print:font-black print:text-black">
+            <span className="text-xl print:text-base">🌍</span>
+            <h2 className="text-lg font-bold text-white tracking-tight print:text-sm print:font-black print:text-black">
               معاينة Google Earth المباشرة للأركان الـ 4
             </h2>
           </div>
-          <p className="text-xs text-neutral-400 print:text-xs print:font-bold print:text-neutral-900">
+          <p className="text-xs text-neutral-400 print:text-[10px] print:font-bold print:text-neutral-800">
             صور الأقمار الصناعية البصرية الطبيعية عالية الدقة مع دبابيس ومحيط
             الموقع
           </p>
@@ -515,12 +582,12 @@ export default function GoogleEarthViewer({
       </div>
 
       {/* Layer Switcher Bar */}
-      <div className="bg-[#14151a] px-4 py-2.5 border-b border-[#262832] flex items-center justify-between text-xs print:bg-neutral-100 print:border-b-2 print:border-black print:text-black print:px-3 print:py-1.5">
+      <div className="bg-[#14151a] px-4 py-2.5 border-b border-[#262832] flex items-center justify-between text-xs print:bg-neutral-100 print:border-b print:border-black print:text-black print:px-2 print:py-0.5">
         <div className="flex items-center gap-2">
-          <span className="text-neutral-400 print:text-black print:font-bold print:text-xs">
+          <span className="text-neutral-400 print:text-black print:font-bold print:text-[8.5px]">
             نمط الخريطة:
           </span>
-          <span className="hidden print:inline text-black font-black print:text-xs">
+          <span className="hidden print:inline text-black font-black print:text-[8.5px]">
             {mapLayer === "hybrid"
               ? "فضائي مع التسميات (Hybrid)"
               : "فضائي نقي (Google Earth)"}
@@ -551,14 +618,14 @@ export default function GoogleEarthViewer({
           </div>
         </div>
 
-        <div className="text-[11px] font-mono text-amber-400 print:text-black print:font-black print:text-xs">
+        <div className="text-[11px] font-mono text-amber-400 print:text-black print:font-black print:text-[8.5px]">
           المركز: {centerLat.toFixed(5)}, {centerLng.toFixed(5)}
         </div>
       </div>
 
       {/* Map Viewport */}
       <div
-        className="relative w-full h-[460px] md:h-[540px] print:h-[350px] bg-[#0b0c10] overflow-hidden"
+        className="relative w-full h-[400px] md:h-[460px] print:h-[420px] bg-[#0b0c10] overflow-hidden"
         dir="ltr"
       >
         {/* Leaflet Mount Container */}
@@ -589,7 +656,7 @@ export default function GoogleEarthViewer({
             type="button"
             onClick={() => {
               if (leafletMapRef.current) {
-                leafletMapRef.current.flyTo([centerLat, centerLng], 19);
+                leafletMapRef.current.flyTo([centerLat, centerLng], 20);
               }
             }}
             title="إعادة التركيز على مركز الـ 4 نقاط"

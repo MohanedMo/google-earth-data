@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { validateCoordinates } from '@/lib/validation';
 import { initEarthEngine, runEarthEngineAnalysis } from '@/lib/earth-engine';
 import { interpretNdbiTimeline } from '@/lib/building-analysis';
+import { findVariablePointsInsidePolygon } from '@/lib/spatial-variables';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +17,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: err.message }, { status: 400 });
     }
 
-    // 2. Initialize Earth Engine
+    // 2. Check for spatial variable points inside the polygon
+    const matchedVariables = findVariablePointsInsidePolygon(validatedCoords);
+    const variableId = matchedVariables.length > 0
+      ? matchedVariables.map(v => v.id).join(', ')
+      : null;
+
+    // 3. Initialize Earth Engine
     try {
       await initEarthEngine();
     } catch (err: any) {
@@ -27,7 +34,7 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-    // 3. Run analysis
+    // 4. Run analysis
     try {
       const { area, timeline } = await runEarthEngineAnalysis(validatedCoords);
 
@@ -39,9 +46,13 @@ export async function POST(request: NextRequest) {
         }, { status: 400 });
       }
 
-      // 4. Interpret results
+      // 5. Interpret results
       const interpretation = interpretNdbiTimeline(timeline);
-      return NextResponse.json(interpretation);
+      return NextResponse.json({
+        ...interpretation,
+        variable_id: variableId,
+        matched_variables: matchedVariables,
+      });
     } catch (err: any) {
       console.error("Earth Engine processing error:", err);
       return NextResponse.json({
