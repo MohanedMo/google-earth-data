@@ -46,14 +46,14 @@ export default function Home() {
 
       <div className="w-full max-w-4xl mx-auto z-10 flex flex-col gap-8 pb-16 print:pb-0 print:gap-4">
         {/* Header */}
-        <header className="text-center space-y-3 mt-8 print:mt-1 print:text-right print:border-b-2 print:border-black print:pb-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-neutral-200 text-[11px] font-semibold tracking-wider text-amber-600 uppercase shadow-sm no-print">
+        <header className="text-center space-y-3 mt-8 no-print">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-neutral-200 text-[11px] font-semibold tracking-wider text-amber-600 uppercase shadow-sm">
             🛰️ الاستشعار عن بعد & Google Earth
           </div>
-          <h1 className="text-3xl md:text-5xl font-black tracking-tight text-neutral-900 print:text-3xl print:font-black print:text-black">
+          <h1 className="text-3xl md:text-5xl font-black tracking-tight text-neutral-900">
             محلل تاريخ المباني
           </h1>
-          <p className="text-sm md:text-base text-neutral-600 max-w-xl mx-auto leading-relaxed print:text-sm print:font-bold print:text-black print:mx-0">
+          <p className="text-sm md:text-base text-neutral-600 max-w-xl mx-auto leading-relaxed">
             تقرير تحليلي رسمي لتقدير تاريخ البناء مع معاينة Google Earth
             المباشرة للأركان
           </p>
@@ -127,7 +127,7 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <footer className="w-full text-center text-[11px] text-neutral-400 border-t border-neutral-200 pt-6 mt-auto print:mt-6 print:pt-4 print:text-[10px]">
+      <footer className="w-full text-center text-[11px] text-neutral-400 border-t border-neutral-200 pt-6 mt-auto print:mt-2 print:pt-2 print:text-[9px] print-avoid-break">
         &copy; {new Date().getFullYear()} محلل تاريخ المباني &bull; تم إنشاء
         التقرير عبر الأقمار الصناعية وGoogle Earth
       </footer>

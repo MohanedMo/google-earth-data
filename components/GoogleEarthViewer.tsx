@@ -69,7 +69,6 @@ export default function GoogleEarthViewer({
       )
       .join("");
 
-    /*
     const variablePlacemarks = (matchedVariables || [])
       .map(
         (v) => `
@@ -82,7 +81,6 @@ export default function GoogleEarthViewer({
     </Placemark>`,
       )
       .join("");
-    */
 
     const kmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
@@ -250,7 +248,6 @@ export default function GoogleEarthViewer({
           </div>
         `);
 
-      /*
       // Matched Variable Points inside polygon (commented out from frontend display)
       if (matchedVariables && matchedVariables.length > 0) {
         matchedVariables.forEach((v) => {
@@ -284,7 +281,6 @@ export default function GoogleEarthViewer({
           `);
         });
       }
-      */
 
       // Invalidate size after rendering and fit bounds with zoom 20
       const fitAndRefresh = () => {
@@ -625,7 +621,7 @@ export default function GoogleEarthViewer({
 
       {/* Map Viewport */}
       <div
-        className="relative w-full h-[400px] md:h-[460px] print:h-[350px] bg-[#0b0c10] overflow-hidden"
+        className="relative w-full h-[400px] md:h-[460px] print:h-[280px] bg-[#0b0c10] overflow-hidden"
         dir="ltr"
       >
         {/* Leaflet Mount Container */}

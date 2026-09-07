@@ -188,7 +188,7 @@ export default function AnalysisResult({
                     <span className="text-neutral-400 text-[10px] print:text-neutral-700 print:font-bold print:text-[9px]">
                       العرض:
                     </span>
-                    <span className="font-semibold text-neutral-900 print:text-black print:font-black">
+                    <span className="font-semibold text-neutral-900 print:text-black print:font-black print:text-[11px]">
                       {coord[1]}
                     </span>
                   </div>
@@ -196,7 +196,7 @@ export default function AnalysisResult({
                     <span className="text-neutral-400 text-[10px] print:text-neutral-700 print:font-bold print:text-[9px]">
                       الطول:
                     </span>
-                    <span className="font-semibold text-neutral-900 print:text-black print:font-black">
+                    <span className="font-semibold text-neutral-900 print:text-black print:font-black print:text-[11px]">
                       {coord[0]}
                     </span>
                   </div>
@@ -207,7 +207,7 @@ export default function AnalysisResult({
         </div>
       )}
 
-      {/* Military Survey Variable Detection Notice (commented out from frontend display)
+      {/* Military Survey Variable Detection Notice */}
       {matchedVariables && matchedVariables.length > 0 ? (
         <div className="p-5 md:p-6 rounded-2xl bg-amber-500/10 border-2 border-amber-500/40 text-neutral-900 shadow-sm print:bg-white print:border-2 print:border-black print:p-3 print:rounded-lg print-avoid-break">
           <div className="flex items-center gap-2.5 mb-2.5 print:mb-1.5">
@@ -250,7 +250,6 @@ export default function AnalysisResult({
           </p>
         </div>
       ) : null}
-      */}
 
       {noBuildingDetected ? (
         <div className="py-6 text-center text-neutral-500 print:py-2 print:text-black">
@@ -270,10 +269,10 @@ export default function AnalysisResult({
                 📢
               </span>
               <div>
-                <strong className="text-neutral-900 block mb-1 print:text-[11px] print:font-black print:text-black print:mb-0">
+                <strong className="text-neutral-900 block mb-1 print:text-sm print:font-black print:text-black print:mb-0">
                   ملخص التحليل:
                 </strong>
-                <span className="print:text-[10.5px] print:font-bold print:text-black leading-relaxed">
+                <span className="print:text-sm print:font-bold print:text-black leading-relaxed">
                   {localizedMessage}
                 </span>
               </div>
@@ -336,12 +335,19 @@ export default function AnalysisResult({
       <div className="p-4 md:p-5 rounded-2xl bg-amber-500/10 border-2 border-amber-500/30 text-neutral-900 shadow-xs print:bg-white print:border-2 print:border-black print:p-2.5 print:rounded-lg print-avoid-break mt-3 print:mt-2">
         <div className="flex items-center gap-2 mb-1.5 print:mb-1 border-b border-amber-500/20 pb-1.5 print:border-b print:border-black print:pb-1">
           <span className="text-lg print:text-xs">⚖️</span>
-          <h3 className="text-sm md:text-base font-black text-amber-950 print:text-[11px] print:font-black print:text-black">
+          <h3 className="text-sm md:text-base font-black text-amber-950 print:text-sm print:font-black print:text-black">
             إفادة رسمية بشأن تتبع عمر المبنى:
           </h3>
         </div>
-        <p className="text-xs md:text-sm text-neutral-800 font-medium leading-relaxed text-justify print:text-[9.5px] print:font-bold print:text-black print:leading-snug">
-          فيما يخص تتبع عمر المبنى نتشرف بان نفيد سيادتكم علما بانه وفقا لاستخدامنا لبرنامج (Google Earth Pro) المجانى والصور قد طرأ تحديث بالبرنامج واصبح غير متاح لدينا صور فضائية لفترات زمنية متباعدة وبناءا على المحضر التنسيقى مع ادارة المساحة العسكرية والتى جاء بها ان التتبع الزمنى للمتغير هو شان المساحة العسكرية نظرا لاستخدامها تقنيات اعلى وادق فى التصوير الجوى والفضائى وتوافر الصور عالية الدقة لديها. فقد اصبح غير واضح لدينا تتبع اعمال المبنى محل الفحص حيث يظهر المبنى بشكل افقي ولا يسمح لنا بمعرفة عدد الادوار.
+        <p className="text-xs md:text-sm text-neutral-800 font-medium leading-relaxed text-justify print:text-sm print:font-bold print:text-black print:leading-snug">
+          فيما يخص تتبع عمر المبنى نتشرف بان نفيد سيادتكم علما بانه وفقا
+          لاستخدامنا لبرنامج (Google Earth Pro) المجانى والصور قد طرأ تحديث
+          بالبرنامج واصبح غير متاح لدينا صور فضائية لفترات زمنية متباعدة وبناءا
+          على المحضر التنسيقى مع ادارة المساحة العسكرية والتى جاء بها ان التتبع
+          الزمنى للمتغير هو شان المساحة العسكرية نظرا لاستخدامها تقنيات اعلى
+          وادق فى التصوير الجوى والفضائى وتوافر الصور عالية الدقة لديها. فقد
+          اصبح غير واضح لدينا تتبع اعمال المبنى محل الفحص حيث يظهر المبنى بشكل
+          افقي ولا يسمح لنا بمعرفة عدد الادوار.
         </p>
       </div>
     </div>

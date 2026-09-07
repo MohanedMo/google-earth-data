@@ -43,7 +43,8 @@ export default function Timeline({
           الجدول الزمني للتحليل السنوي للموقع (من عام 2014 حتى الآن)
         </h2>
         <p className="text-xs text-neutral-500 mt-1 print:text-xs print:font-bold print:text-neutral-900">
-          القيم السنوية المتوسطة لمؤشر التشييد وبناء المنطقة من بيانات صور الأقمار الصناعية
+          القيم السنوية المتوسطة لمؤشر التشييد وبناء المنطقة من بيانات صور
+          الأقمار الصناعية
         </p>
       </div>
 
@@ -51,11 +52,21 @@ export default function Timeline({
         <table className="w-full text-start border-collapse print:border print:border-black print:text-xs">
           <thead>
             <tr className="border-b border-neutral-200 text-neutral-500 text-xs font-semibold uppercase tracking-wider print:bg-neutral-100 print:text-black print:font-black print:border-b-2 print:border-black">
-              <th className="py-3 px-4 print:py-2.5 print:px-3 print:border-r print:border-neutral-300">صورة القمر الصناعي</th>
-              <th className="py-3 px-4 print:py-2.5 print:px-3 print:border-r print:border-neutral-300">السنة</th>
-              <th className="py-3 px-4 print:py-2.5 print:px-3 print:border-r print:border-neutral-300">مؤشر البناء</th>
-              <th className="py-3 px-4 print:py-2.5 print:px-3 print:border-r print:border-neutral-300">مقياس شدة الارتداد</th>
-              <th className="py-3 px-4 text-end print:py-2.5 print:px-3">الحالة</th>
+              <th className="py-3 px-4 print:py-2.5 print:px-3 print:border-r print:border-neutral-300">
+                صورة القمر الصناعي
+              </th>
+              <th className="py-3 px-4 print:py-2.5 print:px-3 print:border-r print:border-neutral-300">
+                السنة
+              </th>
+              <th className="py-3 px-4 print:py-2.5 print:px-3 print:border-r print:border-neutral-300">
+                مؤشر البناء
+              </th>
+              <th className="py-3 px-4 print:py-2.5 print:px-3 print:border-r print:border-neutral-300">
+                مقياس شدة الارتداد
+              </th>
+              <th className="py-3 px-4 text-end print:py-2.5 print:px-3">
+                الحالة
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-neutral-200/60 text-sm print:divide-neutral-300">
